@@ -1,0 +1,77 @@
+# Sourdough App Brainstorming 🍞
+
+Dette dokument er et udkast til konceptet bag den nye surdejs-app. Appens hovedformål er at fjerne kompleksiteten fra surdejsbagning ved at automatisere tidsplanlægning og guide brugeren trin-for-trin, så de får succes hver gang.
+
+## 1. Appens Koncept & Målgruppe
+**Målgruppe:** Nybegyndere og let øvede surdejsbagere, der har svært ved at få hverdagen og tidsplanen til at gå op, eller som glemmer hvornår de skal folde dejen.
+**Problem:** Surdejsbagning kræver timing og overblik. Hvornår skal surdejen fodres, for at dejen kan hæve, for at brødet kan bages i morgen tidlig?
+**Løsning:** *Reverse Engineering* af bageprocessen. Brugeren vælger sit slut-tidspunkt (fx "Jeg vil have friske boller i morgen kl. 09:00"), og appen regner baglæns og opretter en komplet, interaktiv tidsplan.
+
+### Navneidéer
+- **SurdejSchedule**
+- **DoughTimer**
+- **LevainLoop**
+- **BaglænsBagning**
+- **Surdejsmakkeren**
+
+---
+
+## 2. Kernefunktioner (MVP - Minimum Viable Product)
+
+### ⏱️ Baglæns Tidsplanlægning (Smart Schedulering)
+- Brugeren vælger opskrift (fx boller, grydebrød, focaccia).
+- Brugeren indtaster **måltidspunkt** (hvornår det skal være færdigt).
+- Appen genererer en tidsplan:
+  - *Kl. 08:00 (Dag 1):* Fodr surdej
+  - *Kl. 13:00 (Dag 1):* Bland mel og vand (Autolyse)
+  - *Kl. 14:00 (Dag 1):* Tilsæt surdej og salt
+  - *Kl. 14:30 (Dag 1):* Første stræk og fold ... osv.
+
+### ✅ Interaktive Timere & Automatiske Notifikationer
+- Når et trin er nået (fx tid til at folde), får brugeren en push-notifikation.
+- I appen ser brugeren det aktuelle trin.
+- Når brugeren har udført trinnet, trykkes på **"Done / Udført" (✅)**.
+- Systemet starter derefter *automatisk* nedtællingen til næste trin (fx 30 minutter til næste foldning).
+- Hvis brugeren er forsinket med et trin (fx trykker "Done" 15 min senere end planlagt), rykkes hele den resterende tidsplan automatisk.
+
+### 🎥 Visuelle Guides (GIFs / Minivideoer)
+- Hvert trin, der kræver en bestemt teknik, har en lille auto-loopende GIF eller video.
+- Eksempler: Hvordan ser en bageklar surdej ud (flydetest)? Hvordan laver man "Stretch & Fold"? Hvordan former man en stram dejkugle? Hvordan snitter man dejen?
+
+---
+
+## 3. Brugerrejse (User Journey)
+
+1. **Onboarding:** Brugeren åbner appen og vælger "Bag boller".
+2. **Setup:** Appen spørger: "Hvornår vil du have bollerne klar?" (Brugeren vælger i morgen kl. 09:00).
+3. **Planlægning:** Appen viser en oversigt over hele processen. Brugeren accepterer.
+4. **Action:** Appen sender en notifikation kl. 08:00 i dag: "Tid til at fodre din surdej! 🥣".
+5. **Udførelse:** Brugeren fodrer surdejen, åbner appen og trykker "Fodret ✅".
+6. **Automation:** Appen siger "Super! Næste trin er at blande dejen kl. 13:00. Vi giver lyd!"
+7. ... processen fortsætter indtil brødet tages ud af ovnen.
+
+---
+
+## 4. Ekstra funktioner
+- **Temperaturjustering:** Surdej afhænger meget af temperatur. Brugeren kan indtaste deres rumtemperatur (eller appen kan hente den fra en vejr-API/Smart Home), og appen justerer automatisk hævetiderne (koldere = længere tid).
+- **Surdejs-dagbog:** Gem billeder af dit bagværk, notér rumtemperatur og giv brødet en rating (Crumb score, smag), så du kan lære af dine forsøg.
+- **Tilpasning af opskrifter (Baker's Percentage):** Indbygget lommeregner, der nemt skalerer opskrifter op eller ned afhængigt af, hvor meget mel man har tilbage.
+- **Fejlfinding:** En SOS-knap: "Min dej er for klistret!", "Min surdej vil ikke hæve!", som giver hurtige tips.
+
+Premanent live-timer, der tæller ned til næste ting skal gøres, når man har en igangværende aktiv bagning
+---
+
+## 5. Teknisk Stack (Forslag)
+
+Hvis vi skal bygge denne app, er her nogle gode teknologier at overveje:
+
+- **Frontend:** React Native eller Flutter (For at kunne udgive til både iOS og Android fra samme kodebase). Alternativt et PWA (Progressive Web App) bygget i React/Next.js for nem adgang via browser.
+- **Design:** Clean, minimalistisk UI med "earthy" farver (beige, mørkebrun, brændt orange) for at give en organisk følelse.
+- **Backend / Database:** Supabase (PostgreSQL) eller Firebase. Gør det nemt at håndtere bruger-konti, opskrifter og push-notifikationer.
+- **Notifikationer:** Lokal notifikations-håndtering på enheden (da timerne primært afhænger af tid siden sidste step).
+
+> [!NOTE]
+> **Åbne spørgsmål:**
+> 1. Er der nogle specifikke opskrifter, du tænker appen *skal* starte med at have? (Fx et standard grydebrød og morgenboller?)
+> 2. Skal appen primært være til telefon (iOS/Android) som en native app, eller en Web App (website man kan åbne på telefonen)?
+> 3. Hvad synes du om idéen med at lade "forsinkelser" (at man trykker ✅ for sent) automatisk rykke resten af planen? Løser det et reelt problem?

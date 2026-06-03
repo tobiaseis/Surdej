@@ -1,0 +1,831 @@
+Her er et visuelt og strukturelt designforslag til **Surdejsmakkeren** som en professionel, rolig og brugervenlig mobilapp.
+
+## Overordnet designretning
+
+Appen skal føles som en blanding af **køkkenassistent, bagebog og timer**. Ikke for hyggelig på en hjemmelavet måde, men heller ikke kold og teknisk.
+
+Visuel stil: varm, ren, nordisk og praktisk.
+
+Farver:
+
+| Rolle      |     Farve | Brug                            |
+| ---------- | --------: | ------------------------------- |
+| Baggrund   | `#FFF8EF` | Blød cremefarvet app-baggrund   |
+| Primær     | `#8B5E34` | Knapper, aktive elementer, logo |
+| Sekundær   | `#D9A066` | Highlights, små illustrationer  |
+| Tekst      | `#2F2924` | Primær tekst                    |
+| Subtekst   | `#7A6B5D` | Forklaringer og metadata        |
+| Succes     | `#4F7A5A` | “Udført”, færdige trin          |
+| Advarsel   | `#C46A3A` | Forsinkelse, temperaturtips     |
+| Kort/bokse | `#FFFFFF` | Cards oven på baggrunden        |
+| Border     | `#EADCCB` | Diskrete linjer                 |
+
+Typografi: brug en moderne sans-serif som **Inter**, **SF Pro**, **Roboto** eller lignende. Logoet kan godt have lidt mere personlighed, men selve appen bør bruge en meget læsbar font.
+
+Ikoner bør være simple line-icons. Undgå for mange emojis i UI’et. Brug hellere små, rolige illustrationer af mel, skål, ur, dej og ovn.
+
+---
+
+# Appens primære navigation
+
+Jeg ville bruge en bundnavigation med fire faner:
+
+**Hjem**
+Aktiv bagning, næste trin, status og start ny bagning.
+
+**Opskrifter**
+Boller, grydebrød, focaccia osv.
+
+**Dagbog**
+Tidligere bagninger, billeder, rating og noter.
+
+**Hjælp**
+SOS, teknikker, guides og fejlretning.
+
+Profil, indstillinger og temperatur kan ligge som ikon øverst til højre, ikke som egen hovedfane.
+
+---
+
+# Side 1: Splash / Startskærm
+
+Formål: Første brandindtryk.
+
+Skærmen skal være enkel.
+
+Øverst eller midt på skærmen: logo/navn.
+
+**Surdejsmakkeren**
+“Din bageplan regnet baglæns.”
+
+Visuelt element: En enkel illustration af et brød, en skål eller en tidslinje, hvor små trin fører frem til et færdigt brød.
+
+Primær knap nederst:
+
+**Kom i gang**
+
+Sekundær tekst:
+
+“Få besked, når det er tid til at folde, hæve og bage.”
+
+Denne side skal ikke forklare alt. Den skal bare sætte stemningen.
+
+---
+
+# Side 2: Onboarding
+
+Brug 3 korte onboarding-skærme. Ikke mere.
+
+### Onboarding 1: Vælg hvornår du vil spise
+
+Overskrift:
+
+**Start med slutningen**
+
+Tekst:
+
+“Vælg hvornår dit brød eller dine boller skal være klar. Så regner vi resten ud.”
+
+Visuelt: Kalender + lille brød.
+
+### Onboarding 2: Følg planen trin for trin
+
+Overskrift:
+
+**Vi holder styr på tiden**
+
+Tekst:
+
+“Du får en enkel tidsplan med notifikationer, timere og næste handling.”
+
+Visuelt: Vertikal tidslinje.
+
+### Onboarding 3: Justér når hverdagen ændrer sig
+
+Overskrift:
+
+**Forsinket? Planen følger med**
+
+Tekst:
+
+“Tryk udført, når du faktisk er færdig. Resten af planen rykker automatisk.”
+
+Visuelt: Timer der flytter næste trin.
+
+Primær knap:
+
+**Start min første bagning**
+
+Sekundær:
+
+**Spring over**
+
+Vigtigt: Bed ikke om notifikationstilladelse her. Vent til brugeren har lavet sin første plan. Så føles tilladelsen relevant.
+
+---
+
+# Side 3: Hjem
+
+Dette er appens vigtigste side.
+
+Når brugeren ikke har en aktiv bagning:
+
+Øverst:
+
+**Godmorgen**
+“Klar til at bage?”
+
+Stor primær card:
+
+**Planlæg en bagning**
+“Vælg hvad du vil bage, og hvornår det skal være klar.”
+
+Knap:
+
+**Start ny bageplan**
+
+Under kortet:
+
+“Populære opskrifter”
+
+Tre små opskriftskort:
+
+* Surdejsboller
+* Grydebrød
+* Focaccia
+
+Hvert kort viser:
+
+* Navn
+* Estimeret total tid
+* Sværhedsgrad
+* Lille billede/illustration
+
+Når brugeren har en aktiv bagning, skal Hjem se anderledes ud.
+
+Eksempel:
+
+```text
+Surdejsboller
+
+Næste trin
+Stræk og fold dejen
+
+Om 24 min
+
+[Se guide]       [Udført]
+
+Tidsplan i dag
+✓ Fodr surdej              08:00
+✓ Bland dej                13:00
+→ Stræk og fold            14:30
+  Stræk og fold            15:00
+  Sæt på køl               17:30
+```
+
+Det vigtigste på Hjem er altid:
+
+1. Hvad skal jeg gøre nu?
+2. Hvornår skal jeg gøre det?
+3. Hvor trykker jeg, når jeg er færdig?
+
+Den primære CTA skal være stor og tydelig: **Udført**.
+
+---
+
+# Side 4: Opskriftsoversigt
+
+Formål: Brugeren vælger type bagværk.
+
+Layout: Kort i en vertikal liste eller 2-kolonne grid.
+
+Hvert opskriftskort:
+
+* Billede eller illustration
+* Titel
+* Kort beskrivelse
+* Total varighed
+* Hands-on tid
+* Sværhedsgrad
+* Temperaturfølsomhed
+
+Eksempel:
+
+**Surdejsboller**
+“Luftige boller med koldhævning.”
+Total tid: 20–24 timer
+Hands-on: 35 min
+Sværhedsgrad: Let
+
+**Grydebrød**
+“Sprød skorpe og åben krumme.”
+Total tid: 18–26 timer
+Hands-on: 45 min
+Sværhedsgrad: Medium
+
+**Focaccia**
+“Blød, luftig og nem at planlægge.”
+Total tid: 12–18 timer
+Hands-on: 30 min
+Sværhedsgrad: Let
+
+Professionelt touch: Brug små badges i stedet for lange tekster.
+
+Eksempel:
+
+`Let` `Koldhævning` `Begyndervenlig`
+
+---
+
+# Side 5: Opskriftsdetalje
+
+Denne side skal give brugeren tryghed, før de starter.
+
+Øverst: stort billede af færdigt bagværk.
+
+Under billede:
+
+**Surdejsboller**
+
+Kort beskrivelse:
+
+“En fleksibel opskrift til luftige boller, planlagt efter hvornår du vil servere dem.”
+
+Info cards:
+
+* Total tid: 20–24 timer
+* Aktiv tid: 35 min
+* Antal: 12 boller
+* Sværhedsgrad: Let
+
+Sektioner:
+
+**Ingredienser**
+
+* 500 g hvedemel
+* 375 g vand
+* 100 g aktiv surdej
+* 10 g salt
+
+**Du skal bruge**
+
+* Skål
+* Dejskraber
+* Bagepapir
+* Ovnplade
+
+Fast knap nederst:
+
+**Planlæg denne opskrift**
+
+Der skal ikke være for mange knapper her. Det er en beslutningsside.
+
+---
+
+# Side 6: Setup / Planlægning
+
+Dette er den centrale “reverse engineering”-side.
+
+Overskrift:
+
+**Hvornår skal bollerne være klar?**
+
+Brugeren vælger:
+
+* Dato
+* Tidspunkt
+* Antal / portion
+* Rumtemperatur
+* Om de vil bruge koldhævning
+
+Layout:
+
+```text
+Hvornår vil du servere?
+
+[ I morgen ] [ 09:00 ]
+
+Portion
+[ - ] 12 boller [ + ]
+
+Rumtemperatur
+[ 21°C ]
+
+Surdejens styrke
+( ) Meget aktiv
+(•) Normal
+( ) Langsom
+
+[ Lav bageplan ]
+```
+
+Rumtemperatur skal ikke føles teknisk. Brugeren kan vælge med en slider:
+
+**Køligt 18°C — Normalt 21°C — Varmt 25°C**
+
+Under slideren kan appen forklare:
+
+“Ved lavere temperatur får dejen længere hævetid.”
+
+Primær knap:
+
+**Lav bageplan**
+
+---
+
+# Side 7: Planoversigt
+
+Formål: Brugeren skal godkende planen, før den aktiveres.
+
+Denne side skal vise hele tidsplanen, men stadig være overskuelig.
+
+Layout:
+
+Øverst:
+
+**Din bageplan er klar**
+
+Subtekst:
+
+“Bollerne er planlagt til i morgen kl. 09:00.”
+
+Derefter en visuel tidslinje opdelt efter dag:
+
+**I dag**
+
+* 08:00 — Fodr surdej
+* 13:00 — Bland mel og vand
+* 14:00 — Tilsæt surdej og salt
+* 14:30 — Stræk og fold
+* 15:00 — Stræk og fold
+* 15:30 — Stræk og fold
+* 17:30 — Sæt på køl
+
+**I morgen**
+
+* 07:45 — Forvarm ovn
+* 08:15 — Form boller
+* 08:40 — Bag
+* 09:00 — Klar til servering
+
+Hvert trin kan have et ikon:
+
+* Skål
+* Hånd
+* Ur
+* Køleskab
+* Ovn
+* Brød
+
+Nederst:
+
+**Start bageplan**
+
+Sekundært link:
+
+**Tilpas tider**
+
+Når brugeren trykker “Start bageplan”, kan appen bede om notifikationstilladelse:
+
+“Vi kan minde dig om hvert trin, så du ikke skal holde øje med tiden.”
+
+Knap:
+
+**Slå notifikationer til**
+
+---
+
+# Side 8: Aktivt trin
+
+Dette er den vigtigste arbejdsskærm under bagningen.
+
+Den skal være ekstremt tydelig.
+
+Øverst:
+
+**Surdejsboller**
+
+Status badge:
+
+`I gang`
+
+Hero-område:
+
+**Næste trin: Stræk og fold**
+
+Stor nedtælling:
+
+**24:18**
+
+Under:
+
+“Start kl. 14:30”
+
+Primær knap:
+
+**Udført**
+
+Sekundære handlinger:
+
+* **Se teknik**
+* **Jeg er forsinket**
+* **Spring trin over**
+
+Under hero:
+
+En lille preview-video/GIF, hvis trinnet kræver teknik.
+
+Eksempel:
+
+“Sådan laver du stræk og fold”
+
+Videoen bør være uden lyd, auto-loopende og maksimalt 5–8 sekunder.
+
+Nederst:
+
+Kommende trin som kompakt tidslinje.
+
+Når brugeren trykker **Udført**, vises en lille bekræftelse:
+
+**Godt. Næste trin er om 30 minutter.**
+
+Hvis brugeren er forsinket:
+
+**Du er 17 min. efter planen. Vi har rykket resten af tidsplanen.**
+
+Det skal føles som hjælp, ikke som en fejl.
+
+---
+
+# Side 9: Teknikguide
+
+Denne side åbnes fra et aktivt trin eller Hjælp.
+
+Eksempel: “Stræk og fold”
+
+Øverst: video/GIF.
+
+Under:
+
+**Stræk og fold**
+
+Kort forklaring:
+
+“Løft dejen fra én side, stræk den forsigtigt op, og fold den ind over midten. Drej skålen og gentag 4 gange.”
+
+Derefter:
+
+**Sådan ved du, at det går rigtigt**
+
+* Dejen bliver mere elastisk
+* Overfladen bliver glattere
+* Dejen holder bedre form
+
+**Typiske fejl**
+
+* Du river dejen over
+* Du bruger for meget mel
+* Du folder for hårdt
+
+Knap:
+
+**Tilbage til bageplan**
+
+Denne side skal være meget visuel. Nybegyndere lærer ikke teknikker godt nok af tekst alene.
+
+---
+
+# Side 10: Notifikationer
+
+Det skal ikke være en stor separat side i navigationen, men en systemisk del af flowet.
+
+Efter brugeren har accepteret planen:
+
+Kort modal:
+
+**Vil du have påmindelser?**
+
+“Vi giver besked, når det er tid til at fodre, folde, hæve og bage.”
+
+Knapper:
+
+**Ja, mind mig om det**
+**Ikke nu**
+
+Hvis brugeren siger nej, skal appen stadig fungere. På Hjem kan der stå:
+
+“Notifikationer er slået fra. Du kan stadig følge planen her.”
+
+Med link:
+
+**Slå til**
+
+---
+
+# Side 11: Færdig bagning
+
+Når sidste trin er markeret som udført:
+
+Overskrift:
+
+**Bollerne er færdige**
+
+Visuelt: billede/illustration af færdige boller.
+
+Primær handling:
+
+**Gem i dagbog**
+
+Sekundær:
+
+**Start ny bagning**
+
+Hvis brugeren vælger dagbog:
+
+* Upload/tag billede
+* Vælg rating
+* Notér temperatur
+* Notér resultat
+
+Eksempel:
+
+```text
+Hvordan blev resultatet?
+
+Krumme
+[ 1 ] [ 2 ] [ 3 ] [ 4 ] [ 5 ]
+
+Smag
+[ 1 ] [ 2 ] [ 3 ] [ 4 ] [ 5 ]
+
+Noter
+[ Dejen var lidt for våd, men bollerne blev luftige... ]
+
+[ Gem bagning ]
+```
+
+Det er vigtigt, at dagbog ikke bliver obligatorisk. Når brugeren er færdig, skal de kunne afslutte hurtigt.
+
+---
+
+# Side 12: Dagbog
+
+Formål: Læring over tid.
+
+Oversigtsside:
+
+Kort-liste med tidligere bagninger.
+
+Hvert kort viser:
+
+* Foto
+* Opskrift
+* Dato
+* Rating
+* Rumtemperatur
+* Kort note
+
+Eksempel:
+
+**Surdejsboller**
+28. maj
+21°C · Rating 4/5
+“God hævning, men lidt tæt krumme.”
+
+Detaljeside:
+
+Øverst: brugerens billede.
+
+Derefter:
+
+* Opskrift
+* Faktisk tidsplan
+* Rumtemperatur
+* Surdejens styrke
+* Brugerens noter
+* Rating
+* “Bag igen med samme indstillinger”
+
+Den sidste knap er vigtig. Dagbogen skal ikke bare være arkiv; den skal gøre det nemt at forbedre næste forsøg.
+
+---
+
+# Side 13: SOS / Fejlfinding
+
+Denne side skal være hurtig og praktisk.
+
+Overskrift:
+
+**Hvad driller?**
+
+Store problemkort:
+
+* Min dej er for klistret
+* Min surdej hæver ikke
+* Dejen hæver for langsomt
+* Brødet bliver fladt
+* Skorpen bliver for hård
+* Jeg er forsinket i planen
+
+Når brugeren trykker på et problem, kommer en kort diagnose.
+
+Eksempel:
+
+**Min dej er for klistret**
+
+Mulige årsager:
+
+* For høj hydrering
+* For lidt glutenudvikling
+* Dejen er for varm
+* For kort hviletid
+
+Hvad du kan gøre nu:
+
+1. Vent 20 minutter
+2. Lav et ekstra sæt foldninger
+3. Brug våde hænder i stedet for mere mel
+4. Sæt dejen køligere, hvis den flyder ud
+
+Knap:
+
+**Tilpas min aktuelle plan**
+
+Hvis brugeren har en aktiv bagning, kan SOS være kontekstafhængig:
+
+“Du er i bulk fermentation. Her er de mest sandsynlige årsager.”
+
+Det vil få appen til at føles intelligent.
+
+---
+
+# Side 14: Indstillinger
+
+Skal være simpel.
+
+Indhold:
+
+* Standard rumtemperatur
+* Foretrukket måleenhed
+* Notifikationer
+* Standard portionsstørrelse
+* Surdejens typiske styrke
+* App-tema
+* Eksportér dagbog
+* Sprog
+
+Visuelt: almindelig liste med små ikoner. Ikke for meget design her.
+
+---
+
+# Det vigtigste UI-mønster: tidslinjen
+
+Tidslinjen er appens kerneelement. Den bør bruges konsekvent.
+
+Design:
+
+* Vertikal linje i venstre side
+* Runde prikker for hvert trin
+* Grøn checkmark for udførte trin
+* Brun aktiv prik for nuværende trin
+* Grå prikker for kommende trin
+* Tidspunkt til venstre eller over titlen
+* Trinnavn tydeligt
+* Kort hjælpetekst under hvert trin
+
+Eksempel:
+
+```text
+✓ 08:00
+  Fodr surdej
+  Surdejen skal være aktiv og boblende senere i dag.
+
+→ 13:00
+  Bland mel og vand
+  Lad blandingen hvile før surdej og salt tilsættes.
+
+○ 14:00
+  Tilsæt surdej og salt
+```
+
+Tidslinjen skal både kunne bruges som oversigt og som aktiv plan.
+
+---
+
+# Komponenter der får appen til at se professionel ud
+
+Brug faste komponenter i hele appen:
+
+**Recipe Card**
+Billede, titel, badges, tid.
+
+**Step Card**
+Tidspunkt, trin, status, CTA.
+
+**Timer Card**
+Stor nedtælling, aktivt trin, knap.
+
+**Guide Card**
+Video thumbnail, tekniknavn, varighed.
+
+**Status Badge**
+`I gang`, `Forsinket`, `Færdig`, `Koldhævning`.
+
+**Temperature Control**
+Slider med forklarende tekst.
+
+**Bottom CTA**
+Fast knap nederst på vigtige sider.
+
+Professionelle apps føles ofte bedre, fordi de gentager få gode komponenter i stedet for at opfinde nyt på hver side.
+
+---
+
+# MVP-sidehierarki
+
+Til første version ville jeg bygge disse sider først:
+
+1. Splash
+2. Onboarding
+3. Hjem
+4. Opskriftsoversigt
+5. Opskriftsdetalje
+6. Setup: vælg færdigtidspunkt
+7. Planoversigt
+8. Aktiv bageplan
+9. Teknikguide
+10. Færdig bagning
+11. Simpel dagbog
+12. SOS
+
+Gem mere avancerede funktioner til senere:
+
+* Baker’s percentage calculator
+* Smart Home temperatur
+* Vejr-API
+* Avanceret opskriftstilpasning
+* Eksport af dagbog
+* Community eller deling
+
+---
+
+# Forslag til hovedflow
+
+Det ideelle flow er:
+
+**Hjem → Opskrift → Færdigtidspunkt → Planoversigt → Aktiv bageplan → Færdig → Dagbog**
+
+Det skal altid være tydeligt, hvor brugeren er i processen.
+
+Eksempel på flow-indikator på setup-sider:
+
+```text
+1 Opskrift  →  2 Tidspunkt  →  3 Plan
+```
+
+Men under selve bagningen skal flow-indikatoren skiftes ud med tidslinjen.
+
+---
+
+# Tone of voice i appen
+
+Teksten skal være rolig, konkret og handlingsorienteret.
+
+God microcopy:
+
+“Tid til at folde dejen.”
+“Næste trin starter om 30 minutter.”
+“Du er lidt efter planen. Vi har justeret resten.”
+“Dejen skal føles elastisk, ikke fast.”
+“Gem resultatet, så du kan sammenligne næste gang.”
+
+Undgå:
+
+“Ups!”
+“Åh nej!”
+“For sent!”
+“Du skulle have gjort dette tidligere.”
+
+Surdej er allerede stressende for nybegyndere. Appen skal reducere stress.
+
+---
+
+# Mit anbefalede visuelle koncept
+
+Navn: **Surdejsmakkeren**
+
+Look:
+
+* Cremefarvet baggrund
+* Hvide cards med bløde hjørner
+* Brune primærknapper
+* Diskrete grønne succesmarkeringer
+* Store, rolige timer-komponenter
+* Meget tydelige tidslinjer
+* Små illustrative ikoner
+* Fotos/GIFs kun hvor de hjælper teknikken
+
+Startskærmens vigtigste budskab:
+
+**“Vælg hvornår brødet skal være klar. Vi planlægger resten.”**
+
+Det er appens kerneværdi, og den bør gentages i onboarding, setup og marketing.
