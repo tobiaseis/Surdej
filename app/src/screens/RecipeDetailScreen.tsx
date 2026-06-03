@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Image } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
@@ -15,7 +15,9 @@ export const RecipeDetailScreen = () => {
   if (!recipe) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <Text style={typography.h2}>Opskrift ikke fundet.</Text>
+        <View style={styles.container}>
+          <Text style={typography.h2}>Opskrift ikke fundet.</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -26,30 +28,42 @@ export const RecipeDetailScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
+        {recipe.imageUrl ? (
+          <Image source={{ uri: recipe.imageUrl }} style={styles.heroImage} resizeMode="cover" />
+        ) : (
+          <View style={[styles.heroImage, styles.heroPlaceholder]}>
+            <Text style={[typography.bodySmall, { color: colors.textSub }]}>Billede tilføjes</Text>
+          </View>
+        )}
+
         <Text style={typography.h1}>{recipe.name}</Text>
         <Text style={[typography.body, { marginBottom: 24 }]}>{recipe.description}</Text>
 
         <Card style={styles.infoCard}>
-          <Text style={typography.h3}>Information</Text>
+          <Text style={[typography.h3, { marginBottom: 8 }]}>Information</Text>
           <Text style={typography.bodySmall}>Total tid: {totalHours} timer</Text>
-          <Text style={typography.bodySmall}>Aktiv tid: ~35 min</Text>
-          <Text style={typography.bodySmall}>Sværhedsgrad: Let</Text>
+          <Text style={typography.bodySmall}>Aktiv tid: ~{recipe.handsOnMinutes} min</Text>
+          <Text style={typography.bodySmall}>Antal: {recipe.yield}</Text>
+          <Text style={typography.bodySmall}>Sværhedsgrad: {recipe.difficulty}</Text>
         </Card>
 
         <Card style={styles.infoCard}>
-          <Text style={typography.h3}>Ingredienser</Text>
-          <Text style={typography.bodySmall}>• 500 g hvedemel</Text>
-          <Text style={typography.bodySmall}>• 375 g vand</Text>
-          <Text style={typography.bodySmall}>• 100 g aktiv surdej</Text>
-          <Text style={typography.bodySmall}>• 10 g salt</Text>
+          <Text style={[typography.h3, { marginBottom: 8 }]}>Ingredienser</Text>
+          {recipe.ingredients.map((ingredient, idx) => (
+            <Text key={idx} style={typography.bodySmall}>• {ingredient}</Text>
+          ))}
         </Card>
 
+        <Card style={styles.infoCard}>
+          <Text style={[typography.h3, { marginBottom: 8 }]}>Du skal bruge</Text>
+          {recipe.tools.map((tool, idx) => (
+            <Text key={idx} style={typography.bodySmall}>• {tool}</Text>
+          ))}
+        </Card>
       </ScrollView>
+
       <View style={styles.bottomBar}>
-        <Button 
-          title="Planlæg denne opskrift" 
-          onPress={() => navigation.navigate('SetupOpskrift', { recipe })} 
-        />
+        <Button title="Planlæg denne opskrift" onPress={() => navigation.navigate('SetupOpskrift', { recipe })} />
       </View>
     </SafeAreaView>
   );
@@ -62,7 +76,18 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    paddingBottom: 100, // Make room for bottom bar
+    paddingBottom: 100,
+  },
+  heroImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 16,
+    marginBottom: 20,
+    backgroundColor: colors.border,
+  },
+  heroPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   infoCard: {
     marginBottom: 16,
@@ -76,5 +101,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-  }
+  },
 });

@@ -1,39 +1,74 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Settings } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useBakeStore } from '../store/bakeStore';
 
+const SettingsGear = () => {
+  const navigation = useNavigation<any>();
+  return (
+    <View style={styles.headerBar}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Indstillinger')}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        accessibilityLabel="Indstillinger"
+      >
+        <Settings color={colors.textSub} size={24} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 export const HomeScreen = () => {
-  const { activeBake } = useBakeStore();
+  const { activeBake, cancelBake } = useBakeStore();
   const navigation = useNavigation<any>();
 
   // Hvis brugeren har en aktiv bagning:
   if (activeBake) {
     // Find det første 'active' trin, eller det næste 'pending' trin
     const nextStep = activeBake.steps.find((s) => s.status === 'active') || activeBake.steps.find((s) => s.status === 'pending');
-    
+
+    // Bagningen er færdig, når der ikke er flere trin tilbage at udføre.
+    if (!nextStep) {
+      return (
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView contentContainerStyle={styles.container}>
+            <SettingsGear />
+            <Text style={typography.h1}>{activeBake.recipe.name} er færdig 🎉</Text>
+            <Card>
+              <Text style={[typography.body, { marginBottom: 16 }]}>
+                Godt klaret! Alle trin er udført. Start en ny bageplan, når du er klar igen.
+              </Text>
+              <Button
+                title="Start ny bagning"
+                onPress={() => {
+                  cancelBake();
+                  navigation.navigate('Opskrifter');
+                }}
+              />
+            </Card>
+          </ScrollView>
+        </SafeAreaView>
+      );
+    }
+
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.container}>
+          <SettingsGear />
           <Text style={typography.h1}>{activeBake.recipe.name}</Text>
           <Card>
             <Text style={typography.bodySmall}>Næste trin</Text>
-            <Text style={typography.h2}>{nextStep ? nextStep.title : 'Færdig!'}</Text>
-            {nextStep && (
-              <Text style={typography.h3}>Start kl. {nextStep.scheduledAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
-            )}
+            <Text style={typography.h2}>{nextStep.title}</Text>
+            <Text style={typography.h3}>Start kl. {nextStep.scheduledAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</Text>
             <View style={{ height: 16 }} />
-            <Button 
-              title={nextStep ? 'Gå til tidslinje' : 'Se resultat'} 
-              onPress={() => {
-                if (nextStep) {
-                  navigation.navigate('AktivBagning');
-                }
-              }} 
+            <Button
+              title="Gå til tidslinje"
+              onPress={() => navigation.navigate('AktivBagning')}
             />
           </Card>
         </ScrollView>
@@ -45,6 +80,7 @@ export const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
+        <SettingsGear />
         <Text style={typography.h1}>Godmorgen</Text>
         <Text style={[typography.body, { marginBottom: 24 }]}>Klar til at bage?</Text>
 
@@ -82,6 +118,11 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
+  },
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 8,
   },
   miniCard: {
     padding: 16,

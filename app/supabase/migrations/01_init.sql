@@ -6,8 +6,12 @@ CREATE TABLE public.recipes (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text NOT NULL,
   description text NOT NULL,
-  total_hours integer NOT NULL,
-  difficulty text NOT NULL,
+  difficulty text NOT NULL DEFAULT 'Let',
+  image_url text,
+  hands_on_minutes integer NOT NULL DEFAULT 0,
+  yield text NOT NULL DEFAULT '',
+  ingredients text[] NOT NULL DEFAULT '{}',
+  tools text[] NOT NULL DEFAULT '{}',
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -20,7 +24,9 @@ CREATE TABLE public.recipe_steps (
   description text NOT NULL,
   duration_minutes integer NOT NULL,
   requires_action boolean DEFAULT true,
+  temperature_sensitive boolean DEFAULT false, -- Hævetrin der skaleres af temperatur/surdejstyrke
   video_url text, -- Kan være null
+  technique jsonb, -- { summary, successSigns: [], commonMistakes: [] } – kan være null
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -29,7 +35,8 @@ CREATE TABLE public.diary_entries (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   recipe_name text NOT NULL,
-  rating integer,
+  crumb_rating integer,
+  taste_rating integer,
   note text,
   image_url text,
   temp text,
@@ -61,6 +68,22 @@ CREATE POLICY "Users can update their own diary entries" ON public.diary_entries
 CREATE POLICY "Users can delete their own diary entries" ON public.diary_entries
   FOR DELETE USING (auth.uid() = user_id);
 
--- OPRET STORAGE BUCKETS (Dette kan også gøres via Dashboard)
--- Bemærk: Bucket SQL fungerer kun, hvis supabase storage api er slået til. 
--- Det anbefales at oprette buckets "guides" og "diary_images" manuelt via Supabase Dashboard.
+-- OPRET STORAGE BUCKET TIL DAGBOGSBILLEDER
+-- Offentligt læsbar bucket, så billed-URL'er kan vises direkte i appen.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('diary_images', 'diary_images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Alle kan se billederne (offentlig URL).
+CREATE POLICY "Diary images are publicly readable" ON storage.objects
+  FOR SELECT USING (bucket_id = 'diary_images');
+
+-- Kun loggede-ind brugere (inkl. anonyme sessioner) kan uploade.
+CREATE POLICY "Authenticated users can upload diary images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'diary_images' AND auth.role() = 'authenticated');
+
+-- Brugere kan slette/opdatere billeder i deres egen mappe (user_id som mappenavn).
+CREATE POLICY "Users can manage their own diary images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'diary_images' AND owner = auth.uid());
+
+-- BEMÆRK: Opret evt. også en "guides" bucket til teknik-videoer via Dashboard.

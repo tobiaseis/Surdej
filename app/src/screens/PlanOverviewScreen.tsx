@@ -1,35 +1,52 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Modal } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
+import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import type { Recipe } from '../data/recipes';
-import { calculateSchedule, getEarliestTargetEndTime, isTargetEndTimeFeasible } from '../utils/scheduleCalculator';
+import {
+  ScheduleOptions,
+  StarterStrength,
+  calculateSchedule,
+  getEarliestTargetEndTime,
+  isTargetEndTimeFeasible,
+} from '../utils/scheduleCalculator';
 import { useBakeStore } from '../store/bakeStore';
+import { requestNotificationPermission } from '../utils/notifications';
 
 export const PlanOverviewScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { startBake } = useBakeStore();
-  
+
   const recipe = route.params?.recipe as Recipe | undefined;
   const targetTimeIso = route.params?.targetTime;
-  const targetTime = targetTimeIso ? new Date(targetTimeIso) : null;
-  const canCreatePlan = recipe && targetTime ? isTargetEndTimeFeasible(recipe, targetTime) : false;
-  const earliestTarget = recipe ? getEarliestTargetEndTime(recipe) : null;
+  const options: ScheduleOptions = {
+    roomTempC: route.params?.roomTempC ?? 21,
+    starterStrength: (route.params?.starterStrength as StarterStrength) ?? 'normal',
+  };
 
-  // Vi udregner planen asynkront eller via memo for ikke at låse UI
+  const targetTime = targetTimeIso ? new Date(targetTimeIso) : null;
+  const canCreatePlan = recipe && targetTime ? isTargetEndTimeFeasible(recipe, targetTime, new Date(), options) : false;
+  const earliestTarget = recipe ? getEarliestTargetEndTime(recipe, new Date(), options) : null;
+
+  const [permissionVisible, setPermissionVisible] = useState(false);
+
   const calculatedPlan = useMemo(() => {
     if (!recipe || !targetTimeIso) return null;
     if (!canCreatePlan || !targetTime) return null;
-    return calculateSchedule(recipe, targetTime);
-  }, [canCreatePlan, recipe, targetTime, targetTimeIso]);
+    return calculateSchedule(recipe, targetTime, options);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canCreatePlan, recipe, targetTimeIso, options.roomTempC, options.starterStrength]);
 
   if (!recipe || !targetTimeIso) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <Text style={typography.h2}>Kunne ikke beregne plan.</Text>
+        <View style={styles.container}>
+          <Text style={typography.h2}>Kunne ikke beregne plan.</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -41,7 +58,7 @@ export const PlanOverviewScreen = () => {
           <Text style={typography.h2}>Tidspunktet er for tidligt.</Text>
           {earliestTarget && (
             <Text style={typography.body}>
-              VÃ¦lg tidligst {earliestTarget.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.
+              Vælg tidligst {earliestTarget.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.
             </Text>
           )}
         </View>
@@ -49,9 +66,8 @@ export const PlanOverviewScreen = () => {
     );
   }
 
-  const handleStartPlan = () => {
-    startBake(recipe, new Date(targetTimeIso));
-    // Naviger tilbage til Hjem (som nu vil vise den aktive bagning)
+  const activateBake = () => {
+    startBake(recipe, new Date(targetTimeIso), options);
     navigation.navigate('Hjem');
   };
 
@@ -60,7 +76,7 @@ export const PlanOverviewScreen = () => {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={typography.h1}>Din bageplan er klar</Text>
         <Text style={[typography.body, { marginBottom: 24 }]}>
-          {recipe.name} er planlagt til {new Date(targetTimeIso).toLocaleString([], { weekday: 'long', hour: '2-digit', minute:'2-digit' })}.
+          {recipe.name} er planlagt til {new Date(targetTimeIso).toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' })}.
         </Text>
 
         <View style={styles.timeline}>
@@ -87,12 +103,38 @@ export const PlanOverviewScreen = () => {
         </View>
         <View style={{ height: 60 }} />
       </ScrollView>
+
       <View style={styles.bottomBar}>
-        <Button 
-          title="Start bageplan" 
-          onPress={handleStartPlan} 
-        />
+        <Button title="Start bageplan" onPress={() => setPermissionVisible(true)} />
       </View>
+
+      <Modal visible={permissionVisible} transparent animationType="fade" onRequestClose={() => setPermissionVisible(false)}>
+        <View style={styles.modalBackdrop}>
+          <Card style={styles.modalCard}>
+            <Text style={typography.h2}>Vil du have påmindelser?</Text>
+            <Text style={[typography.body, { marginBottom: 20 }]}>
+              Vi giver besked, når det er tid til at fodre, folde, hæve og bage.
+            </Text>
+            <Button
+              title="Ja, mind mig om det"
+              onPress={async () => {
+                await requestNotificationPermission();
+                setPermissionVisible(false);
+                activateBake();
+              }}
+            />
+            <Button
+              title="Ikke nu"
+              variant="outline"
+              style={{ marginTop: 12, borderWidth: 0 }}
+              onPress={() => {
+                setPermissionVisible(false);
+                activateBake();
+              }}
+            />
+          </Card>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -104,7 +146,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    paddingBottom: 100, // Make room for bottom bar
+    paddingBottom: 100,
   },
   timeline: {
     marginTop: 16,
@@ -151,5 +193,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-  }
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    marginBottom: 0,
+  },
 });

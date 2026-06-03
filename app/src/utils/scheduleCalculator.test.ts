@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { Recipe } from '../data/recipes';
 import {
+  ActiveBake,
+  calculateSchedule,
+  delayBakeByMinutes,
+  getAdjustedStepDuration,
   getDefaultTargetEndTime,
   getLiveTimerStep,
   getRecipeDurationMinutes,
@@ -74,5 +78,46 @@ describe('schedule helpers', () => {
     ];
 
     assert.equal(getLiveTimerStep(steps)?.id, recipe.steps[1].id);
+  });
+});
+
+describe('temperature & starter adjustment', () => {
+  const proofStep = { id: 'p', title: 'Hævning', description: '', durationMinutes: 240, requiresAction: true, temperatureSensitive: true };
+  const fixedStep = { id: 'f', title: 'Bagning', description: '', durationMinutes: 20, requiresAction: true };
+
+  it('leaves durations unchanged at the reference (21°C, normal starter)', () => {
+    assert.equal(getAdjustedStepDuration(proofStep, { roomTempC: 21, starterStrength: 'normal' }), 240);
+  });
+
+  it('extends proofing in a colder room', () => {
+    assert.ok(getAdjustedStepDuration(proofStep, { roomTempC: 18, starterStrength: 'normal' }) > 240);
+  });
+
+  it('shortens proofing in a warmer room', () => {
+    assert.ok(getAdjustedStepDuration(proofStep, { roomTempC: 25, starterStrength: 'normal' }) < 240);
+  });
+
+  it('never scales non-temperature-sensitive steps', () => {
+    assert.equal(getAdjustedStepDuration(fixedStep, { roomTempC: 18, starterStrength: 'slow' }), 20);
+  });
+});
+
+describe('delayBakeByMinutes', () => {
+  it('shifts pending steps but leaves completed steps untouched', () => {
+    const target = new Date('2026-06-05T09:00:00.000Z');
+    const bake = calculateSchedule(recipe, target);
+    const completed: ActiveBake = {
+      ...bake,
+      steps: bake.steps.map((step, index) => (index === 0 ? { ...step, status: 'completed' as const } : step)),
+    };
+
+    const originalCompletedAt = completed.steps[0].scheduledAt.getTime();
+    const originalSecondAt = completed.steps[1].scheduledAt.getTime();
+
+    const delayed = delayBakeByMinutes(completed, 30);
+
+    assert.equal(delayed.steps[0].scheduledAt.getTime(), originalCompletedAt);
+    assert.equal(delayed.steps[1].scheduledAt.getTime(), originalSecondAt + 30 * 60 * 1000);
+    assert.equal(delayed.targetEndTime.getTime(), target.getTime() + 30 * 60 * 1000);
   });
 });

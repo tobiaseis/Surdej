@@ -8,7 +8,9 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { StatusBadge } from '../components/StatusBadge';
 import { useBakeStore } from '../store/bakeStore';
-import { getLiveTimerStep } from '../utils/scheduleCalculator';
+import { getLiveTimerStep, isBakeComplete } from '../utils/scheduleCalculator';
+
+const DELAY_MINUTES = 15;
 
 const GuideVideo = ({ uri }: { uri: string }) => {
   const player = useVideoPlayer(uri, (videoPlayer) => {
@@ -29,31 +31,40 @@ const GuideVideo = ({ uri }: { uri: string }) => {
 
 export const ActiveBakeScreen = () => {
   const navigation = useNavigation<any>();
-  const { activeBake, completeStep, cancelBake } = useBakeStore();
-  
-  const [timeLeft, setTimeLeft] = useState<string>('');
+  const { activeBake, completeStep, skipStep, delayBake, cancelBake } = useBakeStore();
 
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  // Når der ikke er flere trin tilbage, er bagningen færdig.
   useEffect(() => {
     if (!activeBake) {
       navigation.navigate('Hjem');
       return;
     }
+    if (isBakeComplete(activeBake)) {
+      navigation.replace('Færdig');
+    }
+  }, [activeBake, navigation]);
+
+  useEffect(() => {
+    if (!activeBake) return;
 
     const interval = setInterval(() => {
       const nextStep = getLiveTimerStep(activeBake.steps);
-      
+
       if (nextStep) {
         const now = new Date();
         const target = new Date(nextStep.scheduledAt);
         const diff = target.getTime() - now.getTime();
-        
+
         if (diff <= 0) {
           setTimeLeft('00:00:00');
         } else {
-          const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const h = Math.floor(diff / (1000 * 60 * 60));
           const m = Math.floor((diff / 1000 / 60) % 60);
           const s = Math.floor((diff / 1000) % 60);
-          
+
           const pad = (num: number) => num.toString().padStart(2, '0');
           setTimeLeft(`${pad(h)}:${pad(m)}:${pad(s)}`);
         }
@@ -65,10 +76,16 @@ export const ActiveBakeScreen = () => {
     return () => clearInterval(interval);
   }, [activeBake]);
 
+  const showFeedback = (message: string) => {
+    setFeedback(message);
+    setTimeout(() => setFeedback(null), 4000);
+  };
+
   if (!activeBake) return null;
 
-  const currentStepIndex = activeBake.steps.findIndex(s => s.status === 'active');
+  const currentStepIndex = activeBake.steps.findIndex((s) => s.status === 'active');
   const currentStep = currentStepIndex !== -1 ? activeBake.steps[currentStepIndex] : null;
+  const hasGuide = !!(currentStep && (currentStep.technique || currentStep.videoUrl));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -78,32 +95,68 @@ export const ActiveBakeScreen = () => {
           <StatusBadge label="I gang" status="active" />
         </View>
 
+        {feedback && (
+          <Card style={styles.feedbackCard}>
+            <Text style={[typography.body, { color: colors.success }]}>{feedback}</Text>
+          </Card>
+        )}
+
         {currentStep && (
           <Card style={styles.heroCard}>
             <Text style={typography.h3}>Næste trin: {currentStep.title}</Text>
-            
+
             {currentStep.videoUrl && (
               <View style={styles.videoContainer}>
                 <GuideVideo key={currentStep.videoUrl} uri={currentStep.videoUrl} />
               </View>
             )}
 
-            {!currentStep.videoUrl && (
-              <Text style={[typography.h1, { fontSize: 48, marginVertical: 16 }]}>{timeLeft}</Text>
-            )}
-            
-            {currentStep.videoUrl && (
-              <Text style={[typography.h2, { marginTop: 12 }]}>{timeLeft}</Text>
-            )}
+            <Text style={[typography.h1, { fontSize: currentStep.videoUrl ? 32 : 48, marginVertical: 16 }]}>
+              {timeLeft}
+            </Text>
 
-            <Text style={typography.bodySmall}>Start kl. {currentStep.scheduledAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-            
+            <Text style={typography.bodySmall}>
+              Start kl. {currentStep.scheduledAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+
             <View style={{ height: 24 }} />
-            <Button 
-              title="Udført" 
-              onPress={() => completeStep(currentStepIndex)} 
+            <Button
+              title="Udført"
+              onPress={() => {
+                completeStep(currentStepIndex);
+                showFeedback('Godt klaret! Næste trin er sat i gang.');
+              }}
               style={{ backgroundColor: colors.success }}
             />
+
+            <View style={styles.secondaryActions}>
+              {hasGuide && (
+                <Button
+                  title="Se teknik"
+                  variant="outline"
+                  style={styles.secondaryButton}
+                  onPress={() => navigation.navigate('Teknik', { step: currentStep })}
+                />
+              )}
+              <Button
+                title="Jeg er forsinket"
+                variant="outline"
+                style={styles.secondaryButton}
+                onPress={() => {
+                  delayBake(DELAY_MINUTES);
+                  showFeedback(`Du er rykket ${DELAY_MINUTES} min. Resten af planen følger med.`);
+                }}
+              />
+              <Button
+                title="Spring trin over"
+                variant="outline"
+                style={styles.secondaryButton}
+                onPress={() => {
+                  skipStep(currentStepIndex);
+                  showFeedback('Trin sprunget over.');
+                }}
+              />
+            </View>
           </Card>
         )}
 
@@ -114,7 +167,7 @@ export const ActiveBakeScreen = () => {
             const isLast = index === activeBake.steps.length - 1;
             const isCompleted = step.status === 'completed';
             const isActive = step.status === 'active';
-            
+
             return (
               <View key={step.id} style={styles.timelineRow}>
                 <View style={styles.timelineLeft}>
@@ -136,7 +189,7 @@ export const ActiveBakeScreen = () => {
             );
           })}
         </View>
-        
+
         <View style={{ height: 40 }} />
         <Button title="Annuller bagning" variant="outline" onPress={cancelBake} />
         <View style={{ height: 40 }} />
@@ -161,12 +214,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  feedbackCard: {
+    backgroundColor: '#EAF2EC',
+  },
   heroCard: {
     alignItems: 'center',
     paddingVertical: 32,
   },
   videoContainer: {
-    width: width - 80, // Card padding minus margin
+    width: width - 80,
     height: 200,
     marginTop: 16,
     borderRadius: 8,
@@ -177,6 +233,14 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+  },
+  secondaryActions: {
+    width: '100%',
+    marginTop: 12,
+    gap: 8,
+  },
+  secondaryButton: {
+    marginTop: 0,
   },
   timeline: {
     marginTop: 8,

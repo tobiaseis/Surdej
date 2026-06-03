@@ -5,6 +5,9 @@ import { typography } from '../theme/typography';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import { useBakeStore } from '../store/bakeStore';
+
+const ADJUST_MINUTES = 20;
 
 const sosIssues = [
   {
@@ -42,9 +45,20 @@ const sosIssues = [
 
 export const SosScreen = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const { activeBake, delayBake } = useBakeStore();
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  const handleAdjustPlan = () => {
+    if (!activeBake) {
+      setFeedback('Du har ingen aktiv bagning at justere lige nu.');
+      return;
+    }
+    delayBake(ADJUST_MINUTES);
+    setFeedback(`Vi har givet dejen ${ADJUST_MINUTES} minutter mere. Resten af planen er rykket.`);
   };
 
   return (
@@ -76,14 +90,15 @@ export const SosScreen = () => {
                       <Text key={idx} style={[typography.bodySmall, { marginBottom: 4 }]}>{idx + 1}. {solution}</Text>
                     ))}
 
-                    <Button 
-                      title="Tilpas min aktuelle plan" 
-                      variant="outline" 
+                    <Button
+                      title="Tilpas min aktuelle plan"
+                      variant="outline"
                       style={{ marginTop: 16 }}
-                      onPress={() => {
-                        // TODO: Implementer dynamisk justering via bakeStore
-                      }}
+                      onPress={handleAdjustPlan}
                     />
+                    {feedback && (
+                      <Text style={[typography.bodySmall, { marginTop: 12, color: colors.success }]}>{feedback}</Text>
+                    )}
                   </View>
                 )}
               </Card>

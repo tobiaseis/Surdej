@@ -8,6 +8,9 @@ import { colors } from '../theme/colors';
 // Screens
 import { HomeScreen } from '../screens/HomeScreen';
 import { ActiveBakeScreen } from '../screens/ActiveBakeScreen';
+import { CompletionScreen } from '../screens/CompletionScreen';
+import { TechniqueGuideScreen } from '../screens/TechniqueGuideScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
 import { RecipeDetailScreen } from '../screens/RecipeDetailScreen';
 import { SetupScreen } from '../screens/SetupScreen';
@@ -27,6 +30,9 @@ const HomeStackNavigator = () => {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="AktivBagning" component={ActiveBakeScreen} />
+      <HomeStack.Screen name="Teknik" component={TechniqueGuideScreen} />
+      <HomeStack.Screen name="Færdig" component={CompletionScreen} />
+      <HomeStack.Screen name="Indstillinger" component={SettingsScreen} />
     </HomeStack.Navigator>
   );
 };

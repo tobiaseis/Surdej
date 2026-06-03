@@ -1,56 +1,92 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, Image } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { Card } from '../components/Card';
 import { StatusBadge } from '../components/StatusBadge';
+import { fetchDiaryEntries, DiaryEntry } from '../data/diary';
 
-const mockDiaryEntries = [
-  {
-    id: '1',
-    recipeName: 'Surdejsboller',
-    date: '28. maj',
-    temp: '21°C',
-    rating: '4/5',
-    note: 'God hævning, men lidt tæt krumme.'
-  },
-  {
-    id: '2',
-    recipeName: 'Grydebrød',
-    date: '14. maj',
-    temp: '23°C',
-    rating: '5/5',
-    note: 'Perfekt ovnspring! Dejen føltes rigtig god under foldningerne.'
+const formatDate = (iso: string) => {
+  try {
+    return new Date(iso).toLocaleDateString([], { day: 'numeric', month: 'long' });
+  } catch {
+    return iso;
   }
-];
+};
+
+const formatRating = (crumb: number | null, taste: number | null) => {
+  const parts: string[] = [];
+  if (crumb) parts.push(`Krumme ${crumb}/5`);
+  if (taste) parts.push(`Smag ${taste}/5`);
+  return parts.join(' · ');
+};
 
 export const DiaryScreen = () => {
+  const [entries, setEntries] = useState<DiaryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      const load = async () => {
+        setLoading(true);
+        const data = await fetchDiaryEntries();
+        if (active) {
+          setEntries(data);
+          setLoading(false);
+        }
+      };
+      load();
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={typography.h1}>Dagbog</Text>
         <Text style={[typography.body, { marginBottom: 24 }]}>Dine tidligere bagninger og noter.</Text>
 
-        {mockDiaryEntries.map((entry) => (
-          <TouchableOpacity key={entry.id} activeOpacity={0.8}>
-            <Card style={styles.entryCard}>
-              <View style={styles.cardHeader}>
-                <Text style={typography.h3}>{entry.recipeName}</Text>
-                <StatusBadge label={entry.date} status="info" />
-              </View>
-              
-              <View style={styles.metaRow}>
-                <Text style={typography.bodySmall}>{entry.temp}</Text>
-                <View style={styles.dot} />
-                <Text style={typography.bodySmall}>Rating {entry.rating}</Text>
-              </View>
-              
-              <Text style={[typography.body, { fontStyle: 'italic', color: colors.textSub }]}>
-                "{entry.note}"
-              </Text>
-            </Card>
-          </TouchableOpacity>
-        ))}
+        {loading ? (
+          <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
+        ) : entries.length === 0 ? (
+          <Card>
+            <Text style={[typography.h3, { marginBottom: 8 }]}>Ingen bagninger endnu</Text>
+            <Text style={typography.bodySmall}>
+              Når du har gennemført en bageplan, kan du gemme resultatet her og sammenligne dine forsøg over tid.
+            </Text>
+          </Card>
+        ) : (
+          entries.map((entry) => {
+            const ratingText = formatRating(entry.crumbRating, entry.tasteRating);
+            return (
+              <Card key={entry.id} style={styles.entryCard}>
+                {entry.imageUrl ? (
+                  <Image source={{ uri: entry.imageUrl }} style={styles.entryImage} resizeMode="cover" />
+                ) : null}
+                <View style={styles.cardHeader}>
+                  <Text style={typography.h3}>{entry.recipeName}</Text>
+                  <StatusBadge label={formatDate(entry.createdAt)} status="info" />
+                </View>
+
+                {(entry.temp || ratingText) && (
+                  <View style={styles.metaRow}>
+                    {entry.temp ? <Text style={typography.bodySmall}>{entry.temp}</Text> : null}
+                    {entry.temp && ratingText ? <View style={styles.dot} /> : null}
+                    {ratingText ? <Text style={typography.bodySmall}>{ratingText}</Text> : null}
+                  </View>
+                )}
+
+                {entry.note ? (
+                  <Text style={[typography.body, { fontStyle: 'italic', color: colors.textSub }]}>"{entry.note}"</Text>
+                ) : null}
+              </Card>
+            );
+          })
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -66,6 +102,13 @@ const styles = StyleSheet.create({
   },
   entryCard: {
     marginBottom: 16,
+  },
+  entryImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: colors.border,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -84,5 +127,5 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: colors.textSub,
     marginHorizontal: 8,
-  }
+  },
 });

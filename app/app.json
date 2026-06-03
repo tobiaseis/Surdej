@@ -29,7 +29,14 @@
     "plugins": [
       "@react-native-community/datetimepicker",
       "./plugins/withNotifeeForegroundService",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Surdejsmakkeren bruger dine billeder, så du kan gemme et foto af dit bagværk i dagbogen.",
+          "cameraPermission": "Surdejsmakkeren bruger kameraet, så du kan tage et foto af dit bagværk til dagbogen."
+        }
+      ]
     ]
   }
 }

@@ -36,11 +36,9 @@ export const RecipeListScreen = () => {
             const totalHours = Math.round(totalMinutes / 60);
 
             return (
-              <TouchableOpacity 
-                key={recipe.id} 
-                onPress={() => {
-                  navigation.navigate('OpskriftDetaljer', { recipe });
-                }}
+              <TouchableOpacity
+                key={recipe.id}
+                onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
                 activeOpacity={0.8}
               >
                 <Card style={styles.recipeCard}>
@@ -49,11 +47,11 @@ export const RecipeListScreen = () => {
                     <StatusBadge label={`${totalHours} timer`} status="info" />
                   </View>
                   <Text style={[typography.body, { marginBottom: 12 }]}>{recipe.description}</Text>
-                  
+
                   <View style={styles.badges}>
-                    <StatusBadge label="Let" status="completed" />
+                    <StatusBadge label={recipe.difficulty} status="completed" />
                     <View style={{ width: 8 }} />
-                    <StatusBadge label="Koldhævning" status="info" />
+                    <StatusBadge label={`Aktiv ${recipe.handsOnMinutes} min`} status="info" />
                   </View>
                 </Card>
               </TouchableOpacity>
@@ -84,5 +82,5 @@ const styles = StyleSheet.create({
   },
   badges: {
     flexDirection: 'row',
-  }
+  },
 });
