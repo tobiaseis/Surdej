@@ -20,8 +20,10 @@
       "permissions": [
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
-        "android.permission.POST_NOTIFICATIONS"
-      ]
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.tobiaseis.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,12 +33,24 @@
       "./plugins/withNotifeeForegroundService",
       "expo-video",
       [
+        "expo-navigation-bar",
+        {
+          "hidden": true,
+          "style": "light"
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Surdejsmakkeren bruger dine billeder, så du kan gemme et foto af dit bagværk i dagbogen.",
           "cameraPermission": "Surdejsmakkeren bruger kameraet, så du kan tage et foto af dit bagværk til dagbogen."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "049e337f-de97-40bf-829c-8de31cc4aea6"
+      }
+    }
   }
 }

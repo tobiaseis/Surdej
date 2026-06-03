@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Settings } from 'lucide-react-native';
 import { colors } from '../theme/colors';
@@ -14,7 +15,9 @@ const SettingsGear = () => {
     <View style={styles.headerBar}>
       <TouchableOpacity
         onPress={() => navigation.navigate('Indstillinger')}
+        style={styles.settingsButton}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        activeOpacity={0.94}
         accessibilityLabel="Indstillinger"
       >
         <Settings color={colors.textSub} size={24} />
@@ -92,14 +95,14 @@ export const HomeScreen = () => {
 
         <Text style={[typography.h3, { marginTop: 24, marginBottom: 12 }]}>Populære opskrifter</Text>
         
-        <TouchableOpacity onPress={() => navigation.navigate('Opskrifter')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Opskrifter')} activeOpacity={0.94}>
           <Card style={styles.miniCard}>
             <Text style={typography.h3}>Surdejsboller</Text>
             <Text style={typography.bodySmall}>Total tid: 20-24 timer</Text>
           </Card>
         </TouchableOpacity>
         
-        <TouchableOpacity onPress={() => navigation.navigate('Opskrifter')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Opskrifter')} activeOpacity={0.94}>
           <Card style={styles.miniCard}>
             <Text style={typography.h3}>Grydebrød</Text>
             <Text style={typography.bodySmall}>Total tid: 18-26 timer</Text>
@@ -117,12 +120,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   headerBar: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginBottom: 8,
+  },
+  settingsButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: -8,
   },
   miniCard: {
     padding: 16,

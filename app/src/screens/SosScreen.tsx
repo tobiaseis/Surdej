@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { Card } from '../components/Card';
@@ -71,7 +72,7 @@ export const SosScreen = () => {
           const isExpanded = expandedId === issue.id;
           
           return (
-            <TouchableOpacity key={issue.id} onPress={() => toggleExpand(issue.id)} activeOpacity={0.8}>
+            <TouchableOpacity key={issue.id} onPress={() => toggleExpand(issue.id)} activeOpacity={0.94}>
               <Card style={styles.issueCard}>
                 <View style={styles.cardHeader}>
                   <Text style={typography.h3}>{issue.title}</Text>
@@ -116,7 +117,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   issueCard: {
     marginBottom: 16,

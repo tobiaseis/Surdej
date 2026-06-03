@@ -33,7 +33,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, status }) => {
 
   return (
     <View style={[styles.badge, { backgroundColor: getBackgroundColor() }]}>
-      <Text style={[typography.bodySmall, { color: getTextColor(), fontWeight: '600' }]}>
+      <Text style={[styles.badgeText, { color: getTextColor() }]}>
         {label}
       </Text>
     </View>
@@ -42,9 +42,17 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, status }) => {
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 100,
     alignSelf: 'flex-start',
+    maxWidth: '100%',
+  },
+  badgeText: {
+    ...typography.bodySmall,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+    includeFontPadding: false,
   },
 });

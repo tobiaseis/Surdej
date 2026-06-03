@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { colors } from '../theme/colors';
@@ -26,7 +27,7 @@ const RatingRow = ({ label, value, onChange }: RatingRowProps) => (
             key={n}
             style={[styles.ratingButton, isActive && styles.ratingButtonActive]}
             onPress={() => onChange(n)}
-            activeOpacity={0.8}
+            activeOpacity={0.94}
           >
             <Text style={[styles.ratingText, isActive && styles.ratingTextActive]}>{n}</Text>
           </TouchableOpacity>
@@ -182,7 +183,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   preview: {
     width: '100%',

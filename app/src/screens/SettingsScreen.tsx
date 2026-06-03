@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Switch, TouchableOpacity, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Share } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
@@ -40,7 +41,7 @@ function Segmented<T extends string | number>({
             key={String(option.value)}
             style={[styles.segment, isActive && styles.segmentActive]}
             onPress={() => onSelect(option.value)}
-            activeOpacity={0.8}
+            activeOpacity={0.94}
           >
             <Text style={[styles.segmentText, isActive && styles.segmentTextActive]}>{option.label}</Text>
           </TouchableOpacity>
@@ -107,11 +108,11 @@ export const SettingsScreen = () => {
           <Text style={typography.h3}>Standard portionsstørrelse</Text>
           <Text style={[typography.bodySmall, { marginBottom: 12 }]}>Antal emner du typisk bager.</Text>
           <View style={styles.stepper}>
-            <TouchableOpacity style={styles.stepperButton} onPress={() => setDefaultPortion(defaultPortion - 1)} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.stepperButton} onPress={() => setDefaultPortion(defaultPortion - 1)} activeOpacity={0.94}>
               <Text style={styles.stepperSymbol}>−</Text>
             </TouchableOpacity>
             <Text style={[typography.h3, { marginBottom: 0 }]}>{defaultPortion}</Text>
-            <TouchableOpacity style={styles.stepperButton} onPress={() => setDefaultPortion(defaultPortion + 1)} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.stepperButton} onPress={() => setDefaultPortion(defaultPortion + 1)} activeOpacity={0.94}>
               <Text style={styles.stepperSymbol}>+</Text>
             </TouchableOpacity>
           </View>
@@ -151,7 +152,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   card: {
     marginBottom: 16,

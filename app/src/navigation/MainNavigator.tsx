@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { PlatformPressable } from '@react-navigation/elements';
 import { Home, BookOpen, Book, HelpCircle } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
@@ -59,6 +60,13 @@ const MainTabs = () => {
           backgroundColor: '#FFF',
           borderTopColor: colors.border,
         },
+        tabBarButton: (props) => (
+          <PlatformPressable
+            {...props}
+            pressColor="rgba(139, 94, 52, 0.08)"
+            pressOpacity={0.92}
+          />
+        ),
       }}
     >
       <Tab.Screen

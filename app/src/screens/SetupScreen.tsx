@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { colors } from '../theme/colors';
@@ -44,7 +45,7 @@ function Segmented<T extends string | number>({ options, selected, onSelect }: S
             key={String(option.value)}
             style={[styles.segment, isActive && styles.segmentActive]}
             onPress={() => onSelect(option.value)}
-            activeOpacity={0.8}
+            activeOpacity={0.94}
           >
             <Text style={[styles.segmentText, isActive && styles.segmentTextActive]}>{option.label}</Text>
           </TouchableOpacity>
@@ -194,7 +195,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
     paddingBottom: 100,
   },
   infoCard: {

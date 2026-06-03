@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
 import { Card } from '../components/Card';
 import { StatusBadge } from '../components/StatusBadge';
 import { fetchRecipes, Recipe } from '../data/recipes';
+import { getRecipeMetaItems } from '../utils/recipeMeta';
 
 export const RecipeListScreen = () => {
   const navigation = useNavigation<any>();
@@ -32,26 +34,24 @@ export const RecipeListScreen = () => {
           <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
         ) : (
           recipes.map((recipe) => {
-            const totalMinutes = recipe.steps.reduce((sum, step) => sum + step.durationMinutes, 0);
-            const totalHours = Math.round(totalMinutes / 60);
+            const metaItems = getRecipeMetaItems(recipe);
 
             return (
               <TouchableOpacity
                 key={recipe.id}
                 onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
-                activeOpacity={0.8}
+                activeOpacity={0.94}
               >
                 <Card style={styles.recipeCard}>
                   <View style={styles.cardHeader}>
                     <Text style={typography.h2}>{recipe.name}</Text>
-                    <StatusBadge label={`${totalHours} timer`} status="info" />
                   </View>
                   <Text style={[typography.body, { marginBottom: 12 }]}>{recipe.description}</Text>
 
                   <View style={styles.badges}>
-                    <StatusBadge label={recipe.difficulty} status="completed" />
-                    <View style={{ width: 8 }} />
-                    <StatusBadge label={`Aktiv ${recipe.handsOnMinutes} min`} status="info" />
+                    {metaItems.map((item) => (
+                      <StatusBadge key={item.label} label={item.label} status={item.status} />
+                    ))}
                   </View>
                 </Card>
               </TouchableOpacity>
@@ -69,18 +69,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   recipeCard: {
     marginBottom: 16,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 8,
   },
   badges: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
 });
