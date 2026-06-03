@@ -37,6 +37,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# local agent/development skills
+/.agents/
+/.claude/
+/skills-lock.json
+
 # generated native folders
 /ios
 /android
