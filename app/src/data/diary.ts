@@ -99,6 +99,58 @@ export const buildDiaryExport = (entries: DiaryEntry[]): string => {
   return ['Min surdejs-dagbog', '', ...lines].join('\n');
 };
 
+/** Felterne på et indlæg, der kan rettes bagefter. Opskriften ligger fast. */
+export type DiaryEntryEdit = {
+  temp?: string;
+  crumbRating?: number;
+  tasteRating?: number;
+  note?: string;
+  /** Undlad feltet for at beholde det nuværende billede. */
+  imageUrl?: string | null;
+};
+
+export const updateDiaryEntry = async (id: string, changes: DiaryEntryEdit): Promise<boolean> => {
+  try {
+    const row: Record<string, unknown> = {
+      temp: changes.temp ?? null,
+      crumb_rating: changes.crumbRating ?? null,
+      taste_rating: changes.tasteRating ?? null,
+      note: changes.note ?? null,
+    };
+
+    // Et billede, der ikke er rørt, må ikke blive slettet af en opdatering.
+    if (changes.imageUrl !== undefined) row.image_url = changes.imageUrl;
+
+    const { error } = await supabase.from('diary_entries').update(row).eq('id', id);
+
+    if (error) {
+      console.warn('Kunne ikke opdatere dagbogsindlæg:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Netværks- eller Supabase-fejl ved opdatering af dagbog.', err);
+    return false;
+  }
+};
+
+export const deleteDiaryEntry = async (id: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase.from('diary_entries').delete().eq('id', id);
+
+    if (error) {
+      console.warn('Kunne ikke slette dagbogsindlæg:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Netværks- eller Supabase-fejl ved sletning af dagbog.', err);
+    return false;
+  }
+};
+
 /**
  * PostgREST svarer PGRST204, når en kolonne ikke findes i skemaet – fx fordi
  * migrationen, der tilføjer den, ikke er kørt i det Supabase-projekt endnu.

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, typography } from '../theme';
-import { Card, Screen, StatusBadge } from '../components';
+import { Button, Card, Screen, StatusBadge } from '../components';
 import { fetchRecipes, Recipe } from '../data/recipes';
 import { getRecipeMetaItems } from '../utils/recipeMeta';
 import { useSettingsStore } from '../store/settingsStore';
@@ -17,20 +18,38 @@ export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'Opskrif
   const starterStrength = useSettingsStore((state) => state.defaultStarterStrength);
   const options = useMemo(() => ({ roomTempC, starterStrength }), [roomTempC, starterStrength]);
 
-  useEffect(() => {
-    const loadRecipes = async () => {
-      setLoading(true);
-      const data = await fetchRecipes();
-      setRecipes(data);
-      setLoading(false);
-    };
-    loadRecipes();
-  }, []);
+  // Hentes ved hvert besøg, så en netop gemt, rettet eller slettet egen
+  // opskrift står rigtigt, når man kommer tilbage fra formularen.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+
+      const loadRecipes = async () => {
+        setLoading(true);
+        const data = await fetchRecipes();
+        if (!active) return;
+        setRecipes(data);
+        setLoading(false);
+      };
+
+      loadRecipes();
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
 
   return (
     <Screen>
       <Text style={typography.h1}>Hvad vil du bage?</Text>
-      <Text style={[typography.body, { marginBottom: spacing.xl }]}>Vælg en opskrift for at starte en plan.</Text>
+      <Text style={[typography.body, { marginBottom: spacing.lg }]}>Vælg en opskrift for at starte en plan.</Text>
+
+      <Button
+        title="Skriv din egen opskrift"
+        variant="outline"
+        style={{ marginBottom: spacing.xl }}
+        onPress={() => navigation.navigate('OpskriftFormular')}
+      />
 
       {loading ? (
         <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: spacing.xxxl }} />
@@ -55,6 +74,7 @@ export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'Opskrif
               <Card style={styles.recipeCard}>
                 <View style={styles.cardHeader}>
                   <Text style={typography.h2}>{recipe.name}</Text>
+                  {recipe.isCustom && <StatusBadge label="Din egen" tone="accent" />}
                 </View>
                 <Text style={[typography.body, { marginBottom: spacing.md }]}>{recipe.description}</Text>
 
@@ -77,6 +97,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.sm,
   },
   badges: {

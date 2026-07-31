@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, radius, spacing, typography } from '../theme';
 import { Button, Card, Screen, StatusBadge } from '../components';
 import { fetchDiaryEntries, DiaryEntry } from '../data/diary';
 import { formatDurationMinutes, formatIsoDate } from '../utils/dateTime';
 import { DiaryRecipe, formatBakeConditions } from '../utils/diaryRecipe';
+import type { DiaryStackScreenProps } from '../navigation/types';
 
 const formatRating = (crumb: number | null, taste: number | null) => {
   const parts: string[] = [];
@@ -67,7 +68,7 @@ const SavedRecipe = ({ recipe }: { recipe: DiaryRecipe }) => {
   );
 };
 
-export const DiaryScreen = () => {
+export const DiaryScreen = ({ navigation }: DiaryStackScreenProps<'DagbogListe'>) => {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -121,43 +122,55 @@ export const DiaryScreen = () => {
           const ratingText = formatRating(entry.crumbRating, entry.tasteRating);
           const isExpanded = expandedId === entry.id;
           return (
-            <Card key={entry.id} style={styles.entryCard}>
-              {entry.imageUrl ? (
-                <Image source={{ uri: entry.imageUrl }} style={styles.entryImage} resizeMode="cover" />
-              ) : null}
-              <View style={styles.cardHeader}>
-                <Text style={typography.h3}>{entry.recipeName}</Text>
-                <StatusBadge label={formatIsoDate(entry.createdAt)} tone="neutral" />
-              </View>
-
-              {(entry.temp || ratingText) && (
-                <View style={styles.metaRow}>
-                  {entry.temp ? <Text style={typography.bodySmall}>{entry.temp}</Text> : null}
-                  {entry.temp && ratingText ? <View style={styles.dot} /> : null}
-                  {ratingText ? <Text style={typography.bodySmall}>{ratingText}</Text> : null}
+            <TouchableOpacity
+              key={entry.id}
+              onPress={() => navigation.navigate('DagbogIndlaeg', { entry })}
+              activeOpacity={0.94}
+              accessibilityRole="button"
+              accessibilityLabel={`Åbn ${entry.recipeName}`}
+            >
+              <Card style={styles.entryCard}>
+                {entry.imageUrl ? (
+                  <Image source={{ uri: entry.imageUrl }} style={styles.entryImage} resizeMode="cover" />
+                ) : null}
+                <View style={styles.cardHeader}>
+                  <Text style={typography.h3}>{entry.recipeName}</Text>
+                  <StatusBadge label={formatIsoDate(entry.createdAt)} tone="neutral" />
                 </View>
-              )}
 
-              {entry.note ? (
-                <Text style={[typography.body, { fontStyle: 'italic', color: colors.textSub }]}>"{entry.note}"</Text>
-              ) : null}
+                {(entry.temp || ratingText) && (
+                  <View style={styles.metaRow}>
+                    {entry.temp ? <Text style={typography.bodySmall}>{entry.temp}</Text> : null}
+                    {entry.temp && ratingText ? <View style={styles.dot} /> : null}
+                    {ratingText ? <Text style={typography.bodySmall}>{ratingText}</Text> : null}
+                  </View>
+                )}
 
-              {entry.recipe ? (
-                <>
-                  {isExpanded && <SavedRecipe recipe={entry.recipe} />}
-                  <Button
-                    title={isExpanded ? 'Skjul opskrift' : 'Vis opskrift'}
-                    variant="outline"
-                    style={{ marginTop: spacing.lg }}
-                    onPress={() => setExpandedId(isExpanded ? null : entry.id)}
-                  />
-                </>
-              ) : (
-                <Text style={[typography.bodySmall, styles.noRecipe]}>
-                  Opskriften blev ikke gemt med dette indlæg.
-                </Text>
-              )}
-            </Card>
+                {entry.note ? (
+                  <Text style={[typography.body, { fontStyle: 'italic', color: colors.textSub }]}>
+                    "{entry.note}"
+                  </Text>
+                ) : null}
+
+                {entry.recipe ? (
+                  <>
+                    {isExpanded && <SavedRecipe recipe={entry.recipe} />}
+                    <Button
+                      title={isExpanded ? 'Skjul opskrift' : 'Vis opskrift'}
+                      variant="outline"
+                      style={{ marginTop: spacing.lg }}
+                      onPress={() => setExpandedId(isExpanded ? null : entry.id)}
+                    />
+                  </>
+                ) : (
+                  <Text style={[typography.bodySmall, styles.noRecipe]}>
+                    Opskriften blev ikke gemt med dette indlæg.
+                  </Text>
+                )}
+
+                <Text style={[typography.bodySmall, styles.openHint]}>Tryk for at rette eller slette</Text>
+              </Card>
+            </TouchableOpacity>
           );
         })
       )}
@@ -217,5 +230,10 @@ const styles = StyleSheet.create({
   noRecipe: {
     marginTop: spacing.md,
     fontStyle: 'italic',
+  },
+  openHint: {
+    marginTop: spacing.md,
+    textAlign: 'center',
+    fontSize: 13,
   },
 });

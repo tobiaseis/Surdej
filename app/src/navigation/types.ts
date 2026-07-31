@@ -2,6 +2,7 @@ import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigat
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { Recipe, RecipeStep } from '../data/recipes';
+import type { DiaryEntry } from '../data/diary';
 import type { StarterStrength } from '../utils/scheduleCalculator';
 
 /**
@@ -25,6 +26,8 @@ export type RecipeStackParamList = {
   SetupOpskrift: { recipe: Recipe };
   /** Uden opskrift starter beregneren på standardforholdene. */
   Beregner: { recipe?: Recipe } | undefined;
+  /** Uden opskrift oprettes en ny; med opskrift redigeres den. */
+  OpskriftFormular: { recipe?: Recipe } | undefined;
   PlanOversigt: {
     recipe: Recipe;
     /** ISO-streng, fordi Date ikke kan serialiseres i navigation-params. */
@@ -32,6 +35,12 @@ export type RecipeStackParamList = {
     roomTempC: number;
     starterStrength: StarterStrength;
   };
+};
+
+export type DiaryStackParamList = {
+  DagbogListe: undefined;
+  /** Indlægget sendes med som det er – felterne er tekst og tal, så det kan serialiseres. */
+  DagbogIndlaeg: { entry: DiaryEntry };
 };
 
 export type CoffeeStackParamList = {
@@ -44,7 +53,7 @@ export type CoffeeStackParamList = {
 export type MainTabParamList = {
   Hjem: NavigatorScreenParams<HomeStackParamList> | undefined;
   Opskrifter: NavigatorScreenParams<RecipeStackParamList> | undefined;
-  Dagbog: undefined;
+  Dagbog: NavigatorScreenParams<DiaryStackParamList> | undefined;
   Kaffe: NavigatorScreenParams<CoffeeStackParamList> | undefined;
   Hjælp: undefined;
 };
@@ -77,6 +86,11 @@ export type HomeStackScreenProps<T extends keyof HomeStackParamList> = Composite
 
 export type RecipeStackScreenProps<T extends keyof RecipeStackParamList> = CompositeScreenProps<
   NativeStackScreenProps<RecipeStackParamList, T>,
+  MainTabScreenProps<keyof MainTabParamList>
+>;
+
+export type DiaryStackScreenProps<T extends keyof DiaryStackParamList> = CompositeScreenProps<
+  NativeStackScreenProps<DiaryStackParamList, T>,
   MainTabScreenProps<keyof MainTabParamList>
 >;
 

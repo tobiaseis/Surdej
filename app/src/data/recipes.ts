@@ -1,4 +1,6 @@
 import { supabase } from '../utils/supabase';
+// Kun typerne går den anden vej (import type), så der er ingen kreds ved kørsel.
+import { fetchUserRecipes } from './userRecipes';
 
 export type Difficulty = 'Let' | 'Medium' | 'Svær';
 
@@ -33,6 +35,8 @@ export type Recipe = {
   ingredients: string[];
   tools: string[];
   steps: RecipeStep[];
+  /** Brugerens egen opskrift – kun de kan redigeres og slettes. */
+  isCustom?: boolean;
 };
 
 const straekOgFoldTechnique: TechniqueGuide = {
@@ -140,7 +144,8 @@ const mapDbRecipe = (r: any, stepsData: any[]): Recipe => {
   };
 };
 
-export const fetchRecipes = async (): Promise<Recipe[]> => {
+/** De færdige opskrifter appen kommer med – uden brugerens egne. */
+const fetchStandardRecipes = async (): Promise<Recipe[]> => {
   try {
     const { data: recipesData, error: recipesError } = await supabase.from('recipes').select('*');
 
@@ -164,4 +169,13 @@ export const fetchRecipes = async (): Promise<Recipe[]> => {
     console.error('Network or Supabase error. Falling back to local standardRecipes.', err);
     return standardRecipes;
   }
+};
+
+/**
+ * Alle opskrifter, brugeren kan vælge imellem. Egne opskrifter ligger øverst –
+ * det er dem, der bliver ledt efter, når man selv har skrevet dem ind.
+ */
+export const fetchRecipes = async (): Promise<Recipe[]> => {
+  const [standard, custom] = await Promise.all([fetchStandardRecipes(), fetchUserRecipes()]);
+  return [...custom, ...standard];
 };

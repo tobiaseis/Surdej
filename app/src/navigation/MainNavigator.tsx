@@ -9,6 +9,7 @@ import { colors } from '../theme';
 import { useSettingsHydrated, useSettingsStore } from '../store/settingsStore';
 import type {
   CoffeeStackParamList,
+  DiaryStackParamList,
   HomeStackParamList,
   MainTabParamList,
   RecipeStackParamList,
@@ -24,10 +25,12 @@ import { StarterFeedScreen } from '../screens/StarterFeedScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
 import { RecipeDetailScreen } from '../screens/RecipeDetailScreen';
+import { RecipeFormScreen } from '../screens/RecipeFormScreen';
 import { SetupScreen } from '../screens/SetupScreen';
 import { DoughCalculatorScreen } from '../screens/DoughCalculatorScreen';
 import { PlanOverviewScreen } from '../screens/PlanOverviewScreen';
 import { DiaryScreen } from '../screens/DiaryScreen';
+import { DiaryEntryScreen } from '../screens/DiaryEntryScreen';
 import { CoffeeScreen } from '../screens/CoffeeScreen';
 import { CoffeeEntryScreen } from '../screens/CoffeeEntryScreen';
 import { SosScreen } from '../screens/SosScreen';
@@ -36,6 +39,7 @@ import { OnboardingScreen } from '../screens/OnboardingScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
+const DiaryStack = createNativeStackNavigator<DiaryStackParamList>();
 const CoffeeStack = createNativeStackNavigator<CoffeeStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -58,10 +62,20 @@ const RecipeStackNavigator = () => {
     <RecipeStack.Navigator screenOptions={{ headerShown: false }}>
       <RecipeStack.Screen name="OpskriftListe" component={RecipeListScreen} />
       <RecipeStack.Screen name="OpskriftDetaljer" component={RecipeDetailScreen} />
+      <RecipeStack.Screen name="OpskriftFormular" component={RecipeFormScreen} />
       <RecipeStack.Screen name="SetupOpskrift" component={SetupScreen} />
       <RecipeStack.Screen name="Beregner" component={DoughCalculatorScreen} />
       <RecipeStack.Screen name="PlanOversigt" component={PlanOverviewScreen} />
     </RecipeStack.Navigator>
+  );
+};
+
+const DiaryStackNavigator = () => {
+  return (
+    <DiaryStack.Navigator screenOptions={{ headerShown: false }}>
+      <DiaryStack.Screen name="DagbogListe" component={DiaryScreen} />
+      <DiaryStack.Screen name="DagbogIndlaeg" component={DiaryEntryScreen} />
+    </DiaryStack.Navigator>
   );
 };
 
@@ -106,7 +120,7 @@ const MainTabs = () => {
       />
       <Tab.Screen
         name="Dagbog"
-        component={DiaryScreen}
+        component={DiaryStackNavigator}
         options={{
           tabBarIcon: ({ color, size }) => <Book color={color} size={size} />,
         }}
