@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography } from '../theme';
-import { Button, Card, Screen, StatusBadge, Timeline, VideoPlayer } from '../components';
+import { BackButton, Button, Card, Screen, StatusBadge, Timeline, VideoPlayer } from '../components';
 import { useBakeStore } from '../store/bakeStore';
 import { ActiveBake, getLiveTimerStep, isBakeComplete } from '../utils/scheduleCalculator';
 import { formatCountdown, formatTime } from '../utils/dateTime';
@@ -60,8 +60,9 @@ export const ActiveBakeScreen = ({ navigation }: HomeStackScreenProps<'AktivBagn
 
   return (
     <Screen>
+      <BackButton />
       <View style={styles.header}>
-        <Text style={typography.h1}>{activeBake.recipe.name}</Text>
+        <Text style={[typography.h1, styles.headerTitle]}>{activeBake.recipe.name}</Text>
         <StatusBadge label="I gang" tone="accent" />
       </View>
 
@@ -143,7 +144,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.xl,
+  },
+  /** Uden flex skubber et langt opskriftsnavn "I gang"-badget ud af skærmen. */
+  headerTitle: {
+    flex: 1,
   },
   feedbackCard: {
     backgroundColor: colors.successSurface,
@@ -158,6 +164,7 @@ const styles = StyleSheet.create({
   secondaryActions: {
     width: '100%',
     marginTop: spacing.md,
-    gap: spacing.sm,
+    /** Samme afstand mellem stablede knapper som på de øvrige skærme. */
+    gap: spacing.md,
   },
 });

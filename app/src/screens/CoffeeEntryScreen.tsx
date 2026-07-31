@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
 import { colors, spacing, typography } from '../theme';
 import {
+  BackButton,
   BottomBar,
   Button,
   Card,
@@ -91,7 +92,8 @@ export const CoffeeEntryScreen = ({ navigation }: CoffeeStackScreenProps<'KaffeN
 
   return (
     <>
-      <Screen withBottomBar contentStyle={styles.content}>
+      <Screen withBottomBar="tall">
+        <BackButton />
         <Text style={typography.h1}>Nyt bryg</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           Skriv ned hvordan du bryggede – så ved du hvad du skal ændre næste gang.
@@ -182,12 +184,7 @@ export const CoffeeEntryScreen = ({ navigation }: CoffeeStackScreenProps<'KaffeN
           />
         </Card>
 
-        <Button
-          title="Fortryd"
-          variant="outline"
-          style={{ borderWidth: 0 }}
-          onPress={() => navigation.goBack()}
-        />
+        <Button title="Fortryd" variant="ghost" onPress={() => navigation.goBack()} />
       </Screen>
 
       <BottomBar>
@@ -201,10 +198,6 @@ export const CoffeeEntryScreen = ({ navigation }: CoffeeStackScreenProps<'KaffeN
 };
 
 const styles = StyleSheet.create({
-  /** Ekstra frihøjde, fordi bundbjælken også rummer en hjælpetekst. */
-  content: {
-    paddingBottom: 150,
-  },
   groupLabel: {
     color: colors.textMain,
     marginBottom: spacing.xs,

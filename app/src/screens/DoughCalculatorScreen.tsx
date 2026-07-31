@@ -1,7 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, Screen, Segmented, SegmentedOption, Stepper } from '../components';
+import {
+  BackButton,
+  BottomBar,
+  Button,
+  Card,
+  Screen,
+  Segmented,
+  SegmentedOption,
+  Stepper,
+} from '../components';
 import {
   DEFAULT_RATIOS,
   DoughRatios,
@@ -34,7 +43,7 @@ const HYDRATION_PRESETS: SegmentedOption<number>[] = [
   { label: 'Våd 85 %', value: 85 },
 ];
 
-export const DoughCalculatorScreen = ({ navigation, route }: RecipeStackScreenProps<'Beregner'>) => {
+export const DoughCalculatorScreen = ({ route }: RecipeStackScreenProps<'Beregner'>) => {
   const recipe = route.params?.recipe;
 
   // Opskriftens egne forhold er kun et udgangspunkt – brugeren kan ændre alt.
@@ -80,7 +89,8 @@ export const DoughCalculatorScreen = ({ navigation, route }: RecipeStackScreenPr
 
   return (
     <>
-      <Screen withBottomBar contentStyle={styles.content}>
+      <Screen withBottomBar="tall">
+        <BackButton />
         <Text style={typography.h1}>Dej-beregner</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           {recipeDough
@@ -228,8 +238,6 @@ export const DoughCalculatorScreen = ({ navigation, route }: RecipeStackScreenPr
             1:1.
           </Text>
         </Card>
-
-        <Button title="Tilbage" variant="outline" style={{ borderWidth: 0 }} onPress={() => navigation.goBack()} />
       </Screen>
 
       <BottomBar>
@@ -252,10 +260,6 @@ export const DoughCalculatorScreen = ({ navigation, route }: RecipeStackScreenPr
 };
 
 const styles = StyleSheet.create({
-  /** Ekstra frihøjde, fordi bundbjælken her er højere end en knap. */
-  content: {
-    paddingBottom: 140,
-  },
   card: {
     marginBottom: spacing.lg,
   },

@@ -124,8 +124,8 @@ export const CompletionScreen = ({ navigation }: HomeStackScreenProps<'Færdig'>
       <Button title="Gem i dagbog" loading={saving} onPress={handleSave} />
       <Button
         title="Spring over"
-        variant="outline"
-        style={{ marginTop: spacing.md, borderWidth: 0 }}
+        variant="ghost"
+        style={{ marginTop: spacing.md }}
         onPress={() => finish('Hjem')}
       />
     </Screen>

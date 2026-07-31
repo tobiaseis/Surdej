@@ -125,7 +125,7 @@ export const DiaryScreen = ({ navigation }: DiaryStackScreenProps<'DagbogListe'>
             <TouchableOpacity
               key={entry.id}
               onPress={() => navigation.navigate('DagbogIndlaeg', { entry })}
-              activeOpacity={0.94}
+              activeOpacity={0.7}
               accessibilityRole="button"
               accessibilityLabel={`Åbn ${entry.recipeName}`}
             >
@@ -134,7 +134,7 @@ export const DiaryScreen = ({ navigation }: DiaryStackScreenProps<'DagbogListe'>
                   <Image source={{ uri: entry.imageUrl }} style={styles.entryImage} resizeMode="cover" />
                 ) : null}
                 <View style={styles.cardHeader}>
-                  <Text style={typography.h3}>{entry.recipeName}</Text>
+                  <Text style={[typography.h3, styles.cardTitle]}>{entry.recipeName}</Text>
                   <StatusBadge label={formatIsoDate(entry.createdAt)} tone="neutral" />
                 </View>
 
@@ -193,7 +193,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  /**
+   * Text har flexShrink: 0 som standard i React Native. Uden dette skubber
+   * fx "Koldhævede Surdejsboller" datobadget ud over kortets kant.
+   */
+  cardTitle: {
+    flex: 1,
   },
   metaRow: {
     flexDirection: 'row',

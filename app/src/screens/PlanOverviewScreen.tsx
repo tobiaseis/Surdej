@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Modal } from 'react-native';
 import { colors, layout, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, Screen, Timeline } from '../components';
+import { BackButton, BottomBar, Button, Card, Screen, Timeline } from '../components';
 import {
   ScheduleOptions,
   calculateSchedule,
@@ -36,6 +36,7 @@ export const PlanOverviewScreen = ({ navigation, route }: RecipeStackScreenProps
   if (!recipe || !targetTimeIso) {
     return (
       <Screen scroll={false}>
+        <BackButton />
         <Text style={typography.h2}>Kunne ikke beregne plan.</Text>
       </Screen>
     );
@@ -44,6 +45,7 @@ export const PlanOverviewScreen = ({ navigation, route }: RecipeStackScreenProps
   if (!calculatedPlan) {
     return (
       <Screen scroll={false}>
+        <BackButton />
         <Text style={typography.h2}>Tidspunktet er for tidligt.</Text>
         {earliestTarget && (
           <Text style={typography.body}>Vælg tidligst {formatDateTime(earliestTarget)}.</Text>
@@ -60,6 +62,7 @@ export const PlanOverviewScreen = ({ navigation, route }: RecipeStackScreenProps
   return (
     <>
       <Screen withBottomBar>
+        <BackButton />
         <Text style={typography.h1}>Din bageplan er klar</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           {recipe.name} er planlagt til {formatWeekdayTime(new Date(targetTimeIso))}.
@@ -89,8 +92,8 @@ export const PlanOverviewScreen = ({ navigation, route }: RecipeStackScreenProps
             />
             <Button
               title="Ikke nu"
-              variant="outline"
-              style={{ marginTop: spacing.md, borderWidth: 0 }}
+              variant="ghost"
+              style={{ marginTop: spacing.md }}
               onPress={() => {
                 setPermissionVisible(false);
                 activateBake();

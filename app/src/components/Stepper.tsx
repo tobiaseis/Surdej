@@ -48,7 +48,7 @@ export const Stepper = ({
         style={[styles.button, disabled && styles.buttonDisabled]}
         onPress={() => shift(direction)}
         disabled={disabled}
-        activeOpacity={0.94}
+        activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel={`${direction === 1 ? 'Forøg' : 'Sænk'} ${label}`}
       >

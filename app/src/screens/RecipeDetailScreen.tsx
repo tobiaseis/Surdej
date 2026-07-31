@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Alert } from 'react-native';
 import { colors, radius, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, Screen } from '../components';
+import { BackButton, BottomBar, Button, Card, Screen } from '../components';
 import { getRecipeTotalHours } from '../utils/recipeMeta';
 import { deleteUserRecipe } from '../data/userRecipes';
 import { useSettingsStore } from '../store/settingsStore';
@@ -49,6 +49,7 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
   if (!recipe) {
     return (
       <Screen scroll={false}>
+        <BackButton />
         <Text style={typography.h2}>Opskrift ikke fundet.</Text>
       </Screen>
     );
@@ -59,11 +60,13 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
   return (
     <>
       <Screen withBottomBar>
+        <BackButton />
         {recipe.imageUrl ? (
           <Image source={{ uri: recipe.imageUrl }} style={styles.heroImage} resizeMode="cover" />
         ) : (
           <View style={[styles.heroImage, styles.heroPlaceholder]}>
-            <Text style={[typography.bodySmall, { color: colors.textSub }]}>Billede tilføjes</Text>
+            {/* textSub gav kun 3,8:1 på den sandfarvede flade. */}
+            <Text style={[typography.bodySmall, { color: colors.textMain }]}>Billede tilføjes</Text>
           </View>
         )}
 
@@ -111,9 +114,9 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
             />
             <Button
               title="Slet opskrift"
-              variant="outline"
+              variant="danger"
               loading={deleting}
-              style={{ marginTop: spacing.md, borderColor: colors.warning }}
+              style={{ marginTop: spacing.md }}
               onPress={confirmDelete}
             />
           </Card>

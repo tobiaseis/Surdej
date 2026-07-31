@@ -5,7 +5,11 @@ export const colors = {
   textMain: '#2F2924',
   textSub: '#7A6B5D',
   success: '#4F7A5A',
-  warning: '#C46A3A',
+  /**
+   * Mørkere end den oprindelige #C46A3A, så den både består WCAG AA som
+   * tekstfarve på baggrunden (5,1:1) og bag hvid tekst i et badge (5,4:1).
+   */
+  warning: '#A9522A',
   card: '#FFFFFF',
   border: '#EADCCB',
 

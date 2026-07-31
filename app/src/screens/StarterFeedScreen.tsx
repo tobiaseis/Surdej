@@ -2,7 +2,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { colors, fonts, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, Screen, Segmented, SegmentedOption, Stepper } from '../components';
+import {
+  BackButton,
+  BottomBar,
+  Button,
+  Card,
+  Screen,
+  Segmented,
+  SegmentedOption,
+  Stepper,
+} from '../components';
 import {
   DEFAULT_FEED_RATIO,
   FEED_LIMITS,
@@ -67,7 +76,7 @@ const getDefaultReadyTime = () => {
   return target;
 };
 
-export const StarterFeedScreen = ({ navigation }: HomeStackScreenProps<'Fodring'>) => {
+export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
   const defaultRoomTempC = useSettingsStore((state) => state.defaultRoomTempC);
   const defaultStarterStrength = useSettingsStore((state) => state.defaultStarterStrength);
 
@@ -129,7 +138,8 @@ export const StarterFeedScreen = ({ navigation }: HomeStackScreenProps<'Fodring'
 
   return (
     <>
-      <Screen withBottomBar contentStyle={styles.content}>
+      <Screen withBottomBar="tall">
+        <BackButton />
         <Text style={typography.h1}>Fodr surdejen</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           Vælg forholdet, så får du at vide hvor meget mel og vand der skal i – og hvornår surdejen er
@@ -305,8 +315,6 @@ export const StarterFeedScreen = ({ navigation }: HomeStackScreenProps<'Fodring'
             begynder at flade ud på toppen.
           </Text>
         </Card>
-
-        <Button title="Tilbage" variant="outline" style={{ borderWidth: 0 }} onPress={() => navigation.goBack()} />
       </Screen>
 
       <BottomBar>
@@ -328,10 +336,6 @@ export const StarterFeedScreen = ({ navigation }: HomeStackScreenProps<'Fodring'
 };
 
 const styles = StyleSheet.create({
-  /** Ekstra frihøjde, fordi bundbjælken her er højere end en knap. */
-  content: {
-    paddingBottom: 140,
-  },
   card: {
     marginBottom: spacing.lg,
   },

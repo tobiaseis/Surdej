@@ -23,7 +23,7 @@ const SettingsGear = () => {
         onPress={() => navigation.navigate('Indstillinger')}
         style={styles.settingsButton}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        activeOpacity={0.94}
+        activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel="Indstillinger"
       >
@@ -154,7 +154,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           <TouchableOpacity
             key={recipe.id}
             onPress={() => openRecipe(recipe)}
-            activeOpacity={0.94}
+            activeOpacity={0.7}
             accessibilityRole="button"
           >
             <Card style={styles.miniCard}>

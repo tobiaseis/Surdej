@@ -69,7 +69,8 @@ export const PhotoPicker = ({
         <Image source={{ uri: imageUri }} style={styles.preview} resizeMode="cover" />
       ) : (
         <View style={[styles.preview, styles.previewPlaceholder]}>
-          <Text style={[typography.bodySmall, { color: colors.textSub }]}>{placeholder}</Text>
+          {/* textSub gav kun 3,8:1 på den sandfarvede flade. */}
+          <Text style={[typography.bodySmall, { color: colors.textMain }]}>{placeholder}</Text>
         </View>
       )}
       <View style={styles.buttons}>

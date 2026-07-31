@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react-native';
-import { colors, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, Screen, Segmented, SegmentedOption, Stepper, TextField } from '../components';
+import { colors, layout, spacing, typography } from '../theme';
+import {
+  BackButton,
+  BottomBar,
+  Button,
+  Card,
+  Screen,
+  Segmented,
+  SegmentedOption,
+  Stepper,
+  TextField,
+} from '../components';
 import {
   DIFFICULTIES,
   RecipeDraft,
@@ -56,7 +66,7 @@ const LineRow = ({
     <TouchableOpacity
       style={styles.lineRemove}
       onPress={onRemove}
-      activeOpacity={0.94}
+      activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityLabel={`Fjern ${label.toLowerCase()}`}
     >
@@ -129,7 +139,8 @@ export const RecipeFormScreen = ({ navigation, route }: RecipeStackScreenProps<'
 
   return (
     <>
-      <Screen withBottomBar contentStyle={styles.content}>
+      <Screen withBottomBar>
+        <BackButton />
         <Text style={typography.h1}>{existing ? 'Rediger opskrift' : 'Ny opskrift'}</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           Skriv opskriften ind, som den står. Trinnene og deres tider er dem, bageplanen regner
@@ -236,7 +247,7 @@ export const RecipeFormScreen = ({ navigation, route }: RecipeStackScreenProps<'
                     onPress={() => shiftStep(index, -1)}
                     disabled={index === 0}
                     style={styles.iconButton}
-                    activeOpacity={0.94}
+                    activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel={`Flyt trin ${index + 1} op`}
                   >
@@ -246,7 +257,7 @@ export const RecipeFormScreen = ({ navigation, route }: RecipeStackScreenProps<'
                     onPress={() => shiftStep(index, 1)}
                     disabled={index === draft.steps.length - 1}
                     style={styles.iconButton}
-                    activeOpacity={0.94}
+                    activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel={`Flyt trin ${index + 1} ned`}
                   >
@@ -258,7 +269,7 @@ export const RecipeFormScreen = ({ navigation, route }: RecipeStackScreenProps<'
                   <TouchableOpacity
                     onPress={() => removeStep(index)}
                     style={styles.iconButton}
-                    activeOpacity={0.94}
+                    activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel={`Slet trin ${index + 1}`}
                   >
@@ -320,12 +331,7 @@ export const RecipeFormScreen = ({ navigation, route }: RecipeStackScreenProps<'
           </Card>
         )}
 
-        <Button
-          title="Fortryd"
-          variant="outline"
-          style={{ borderWidth: 0 }}
-          onPress={() => navigation.goBack()}
-        />
+        <Button title="Fortryd" variant="ghost" onPress={() => navigation.goBack()} />
       </Screen>
 
       <BottomBar>
@@ -340,9 +346,6 @@ export const RecipeFormScreen = ({ navigation, route }: RecipeStackScreenProps<'
 };
 
 const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 120,
-  },
   card: {
     marginBottom: spacing.lg,
   },
@@ -363,8 +366,8 @@ const styles = StyleSheet.create({
   },
   /** Løftes ned på højde med selve feltet, forbi feltets label. */
   lineRemove: {
-    width: 44,
-    height: 44,
+    width: layout.minTouchTarget,
+    height: layout.minTouchTarget,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 22,
@@ -381,12 +384,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
+  /** Luft imellem, så "slet" ikke deler kant med "flyt ned". */
   stepActions: {
     flexDirection: 'row',
+    gap: spacing.sm,
   },
   iconButton: {
-    width: 40,
-    height: 40,
+    width: layout.minTouchTarget,
+    height: layout.minTouchTarget,
     alignItems: 'center',
     justifyContent: 'center',
   },

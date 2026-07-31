@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { colors, fonts, radius, spacing } from '../theme';
+import { colors, fonts, layout, radius, spacing } from '../theme';
 
 export type SegmentedOption<T> = {
   label: string;
@@ -24,11 +24,22 @@ export function Segmented<T extends string | number>({ options, selected, onSele
             key={String(option.value)}
             style={[styles.segment, isActive && styles.segmentActive]}
             onPress={() => onSelect(option.value)}
-            activeOpacity={0.94}
+            activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
           >
-            <Text style={[styles.label, isActive && styles.labelActive]}>{option.label}</Text>
+            {/*
+              Længere labels ("Klassisk 75 %", "Normalt 21°C") brød til to
+              linjer og gjorde hele rækken høj og skæv. Skaler i stedet ned.
+            */}
+            <Text
+              style={[styles.label, isActive && styles.labelActive]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {option.label}
+            </Text>
           </TouchableOpacity>
         );
       })}
@@ -43,7 +54,8 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    paddingVertical: spacing.md,
+    minHeight: layout.minTouchTarget,
+    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
     borderRadius: radius.md,
     borderWidth: 1,

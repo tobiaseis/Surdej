@@ -1,3 +1,4 @@
+export { BackButton } from './BackButton';
 export { BottomBar } from './BottomBar';
 export { Button } from './Button';
 export { Card } from './Card';

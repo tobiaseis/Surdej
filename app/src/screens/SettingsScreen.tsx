@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, Share, Alert } from 'react-native';
 import { colors, spacing, typography } from '../theme';
-import { Button, Card, Screen, Segmented, SegmentedOption } from '../components';
+import { BackButton, Button, Card, Screen, Segmented, SegmentedOption } from '../components';
 import { useSettingsStore } from '../store/settingsStore';
 import { useBakeStore } from '../store/bakeStore';
 import { StarterStrength } from '../utils/scheduleCalculator';
@@ -20,7 +20,7 @@ const STARTER_OPTIONS: SegmentedOption<StarterStrength>[] = [
   { label: 'Langsom', value: 'slow' },
 ];
 
-export const SettingsScreen = ({ navigation }: HomeStackScreenProps<'Indstillinger'>) => {
+export const SettingsScreen = (_props: HomeStackScreenProps<'Indstillinger'>) => {
   const {
     defaultRoomTempC,
     defaultStarterStrength,
@@ -63,6 +63,7 @@ export const SettingsScreen = ({ navigation }: HomeStackScreenProps<'Indstilling
 
   return (
     <Screen>
+      <BackButton />
       <Text style={typography.h1}>Indstillinger</Text>
       <Text style={[typography.body, { marginBottom: spacing.xl }]}>
         Standardvalg bruges, når du laver en ny bageplan.
@@ -100,9 +101,6 @@ export const SettingsScreen = ({ navigation }: HomeStackScreenProps<'Indstilling
         <Text style={[typography.bodySmall, { marginBottom: spacing.md }]}>Del dine bagninger som tekst.</Text>
         <Button title="Eksportér" variant="outline" loading={exporting} onPress={handleExport} />
       </Card>
-
-      <View style={{ height: spacing.xl }} />
-      <Button title="Tilbage" variant="outline" style={{ borderWidth: 0 }} onPress={() => navigation.goBack()} />
     </Screen>
   );
 };

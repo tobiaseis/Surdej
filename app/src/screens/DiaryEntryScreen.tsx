@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
-import { colors, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, PhotoPicker, RatingScale, Screen, TextField } from '../components';
+import { spacing, typography } from '../theme';
+import {
+  BackButton,
+  BottomBar,
+  Button,
+  Card,
+  PhotoPicker,
+  RatingScale,
+  Screen,
+  TextField,
+} from '../components';
 import { deleteDiaryEntry, updateDiaryEntry, uploadDiaryImage } from '../data/diary';
 import { formatDurationMinutes, formatIsoDate, formatLongDate } from '../utils/dateTime';
 import { formatBakeConditions } from '../utils/diaryRecipe';
@@ -98,7 +107,8 @@ export const DiaryEntryScreen = ({ navigation, route }: DiaryStackScreenProps<'D
 
   return (
     <>
-      <Screen withBottomBar contentStyle={styles.content}>
+      <Screen withBottomBar>
+        <BackButton />
         <Text style={typography.h1}>{entry.recipeName}</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           Bagt {formatIsoDate(entry.createdAt, formatLongDate)}.
@@ -116,8 +126,8 @@ export const DiaryEntryScreen = ({ navigation, route }: DiaryStackScreenProps<'D
         {imageUri && (
           <Button
             title="Fjern billede"
-            variant="outline"
-            style={{ borderWidth: 0, marginBottom: spacing.lg }}
+            variant="ghost"
+            style={{ marginBottom: spacing.lg }}
             onPress={() => {
               setImageUri(null);
               setImageBase64(null);
@@ -172,17 +182,11 @@ export const DiaryEntryScreen = ({ navigation, route }: DiaryStackScreenProps<'D
           </Card>
         ) : null}
 
-        <Button
-          title="Slet indlæg"
-          variant="outline"
-          loading={deleting}
-          style={{ borderColor: colors.warning }}
-          onPress={confirmDelete}
-        />
+        <Button title="Slet indlæg" variant="danger" loading={deleting} onPress={confirmDelete} />
         <Button
           title="Fortryd"
-          variant="outline"
-          style={{ marginTop: spacing.md, borderWidth: 0 }}
+          variant="ghost"
+          style={{ marginTop: spacing.md }}
           onPress={() => navigation.goBack()}
         />
       </Screen>
@@ -195,9 +199,6 @@ export const DiaryEntryScreen = ({ navigation, route }: DiaryStackScreenProps<'D
 };
 
 const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 120,
-  },
   card: {
     marginBottom: spacing.lg,
   },

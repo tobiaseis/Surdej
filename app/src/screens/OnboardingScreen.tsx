@@ -62,8 +62,8 @@ export const OnboardingScreen = ({ navigation }: RootStackScreenProps<'Onboardin
         {currentStep < steps.length - 1 && (
           <Button
             title="Spring over"
-            variant="outline"
-            style={{ marginTop: spacing.lg, borderWidth: 0 }}
+            variant="ghost"
+            style={{ marginTop: spacing.md }}
             onPress={finishOnboarding}
           />
         )}

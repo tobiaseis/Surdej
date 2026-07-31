@@ -84,7 +84,7 @@ export const SosScreen = () => {
           <TouchableOpacity
             key={issue.id}
             onPress={() => toggleExpand(issue.id)}
-            activeOpacity={0.94}
+            activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityState={{ expanded: isExpanded }}
           >

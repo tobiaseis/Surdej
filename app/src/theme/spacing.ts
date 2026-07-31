@@ -25,6 +25,18 @@ export const layout = {
   /** Lidt mere luft i toppen end i siderne, så overskriften får plads. */
   screenPaddingTop: 28,
   screenPaddingBottom: spacing.xl,
-  /** Frihøjde under indholdet, når skærmen har en fastgjort bundbjælke. */
-  bottomBarClearance: 100,
+  /**
+   * Frihøjde under indholdet, når skærmen har en fastgjort bundbjælke med
+   * én knap: bjælkens egen højde (24 + 52 + 24) plus lidt luft.
+   */
+  bottomBarClearance: 120,
+  /** Samme, men til bjælker med to linjer – resultattal eller en hjælpetekst. */
+  bottomBarClearanceTall: 150,
+  /**
+   * Tekstlinjer bliver ulæseligt lange på tablets, hvor indholdet ellers
+   * ville strække sig over hele bredden. Appen understøtter iPad.
+   */
+  maxContentWidth: 560,
+  /** Mindste trykflade. 44pt er Apples HIG; Android anbefaler 48dp. */
+  minTouchTarget: 44,
 } as const;

@@ -68,12 +68,12 @@ export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'Opskrif
             <TouchableOpacity
               key={recipe.id}
               onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
-              activeOpacity={0.94}
+              activeOpacity={0.7}
               accessibilityRole="button"
             >
               <Card style={styles.recipeCard}>
                 <View style={styles.cardHeader}>
-                  <Text style={typography.h2}>{recipe.name}</Text>
+                  <Text style={[typography.h2, styles.cardTitle]}>{recipe.name}</Text>
                   {recipe.isCustom && <StatusBadge label="Din egen" tone="accent" />}
                 </View>
                 <Text style={[typography.body, { marginBottom: spacing.md }]}>{recipe.description}</Text>
@@ -102,6 +102,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  /**
+   * Text har flexShrink: 0 som standard i React Native. Uden dette skubber
+   * et langt opskriftsnavn "Din egen"-badget ud over kortets kant.
+   */
+  cardTitle: {
+    flex: 1,
   },
   badges: {
     flexDirection: 'row',

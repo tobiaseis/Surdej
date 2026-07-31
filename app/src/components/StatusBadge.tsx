@@ -21,11 +21,21 @@ const BACKGROUNDS: Record<BadgeTone, string> = {
   warning: colors.warning,
 };
 
+/**
+ * Tekstfarven vælges pr. tone, ikke efter et enkelt undtagelsestilfælde.
+ * Hvid på den lyse `secondary` gav kun 2,3:1 og faldt igennem WCAG AA –
+ * mørk tekst på samme flade giver 6,3:1.
+ */
+const FOREGROUNDS: Record<BadgeTone, string> = {
+  neutral: colors.textMain,
+  accent: colors.textMain,
+  positive: colors.onPrimary,
+  warning: colors.onPrimary,
+};
+
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, tone = 'neutral' }) => (
   <View style={[styles.badge, { backgroundColor: BACKGROUNDS[tone] }]}>
-    <Text style={[styles.badgeText, { color: tone === 'neutral' ? colors.textMain : colors.onPrimary }]}>
-      {label}
-    </Text>
+    <Text style={[styles.badgeText, { color: FOREGROUNDS[tone] }]}>{label}</Text>
   </View>
 );
 

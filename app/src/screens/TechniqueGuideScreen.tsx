@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { spacing, typography } from '../theme';
-import { Button, Card, Screen, VideoPlayer } from '../components';
+import { BackButton, Button, Card, Screen, VideoPlayer } from '../components';
 import type { HomeStackScreenProps } from '../navigation/types';
 
 export const TechniqueGuideScreen = ({ navigation, route }: HomeStackScreenProps<'Teknik'>) => {
@@ -10,6 +10,7 @@ export const TechniqueGuideScreen = ({ navigation, route }: HomeStackScreenProps
   if (!step) {
     return (
       <Screen scroll={false}>
+        <BackButton />
         <Text style={typography.h2}>Ingen teknik valgt.</Text>
       </Screen>
     );
@@ -19,6 +20,7 @@ export const TechniqueGuideScreen = ({ navigation, route }: HomeStackScreenProps
 
   return (
     <Screen>
+      <BackButton />
       {step.videoUrl && <VideoPlayer uri={step.videoUrl} height={220} style={styles.video} />}
 
       <Text style={typography.h1}>{step.title}</Text>

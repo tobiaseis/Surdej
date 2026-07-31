@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Text, StyleSheet, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { colors, spacing, typography } from '../theme';
-import { BottomBar, Button, Card, Screen, Segmented, SegmentedOption } from '../components';
+import { BackButton, BottomBar, Button, Card, Screen, Segmented, SegmentedOption } from '../components';
 import type { RecipeStackScreenProps } from '../navigation/types';
 import {
   StarterStrength,
@@ -75,6 +75,7 @@ export const SetupScreen = ({ navigation, route }: RecipeStackScreenProps<'Setup
   return (
     <>
       <Screen withBottomBar>
+        <BackButton />
         <Text style={typography.h1}>Hvornår skal det være klar?</Text>
         <Text style={[typography.body, { marginBottom: spacing.xl }]}>
           Vælg hvornår du vil spise, så regner vi resten ud.
