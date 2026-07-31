@@ -49,6 +49,12 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
           {recipe.ingredients.map((ingredient, idx) => (
             <Text key={idx} style={typography.bodySmall}>• {ingredient}</Text>
           ))}
+          <Button
+            title="Tilpas mængder"
+            variant="outline"
+            style={{ marginTop: spacing.lg }}
+            onPress={() => navigation.navigate('Beregner', { recipe })}
+          />
         </Card>
 
         <Card style={styles.infoCard}>

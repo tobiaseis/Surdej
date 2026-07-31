@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "surdejsmakkeren",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
@@ -14,6 +14,7 @@
     "@supabase/supabase-js": "^2.107.0",
     "base64-arraybuffer": "^1.0.2",
     "expo": "~56.0.8",
+    "expo-dev-client": "~56.0.24",
     "expo-font": "~56.0.7",
     "expo-image-picker": "~56.0.15",
     "expo-navigation-bar": "~56.0.3",

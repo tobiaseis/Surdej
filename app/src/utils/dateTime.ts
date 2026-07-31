@@ -60,6 +60,15 @@ export function getGreeting(now = new Date()): string {
 const pad = (value: number) => value.toString().padStart(2, '0');
 
 /**
+ * Formaterer en varighed som m:ss – fx en kaffes løbetid. Minuttallet får
+ * ikke foranstillet nul, så "2:30" ser ud som på et brygskema.
+ */
+export function formatMinutesSeconds(totalSeconds: number): string {
+  const safeSeconds = Number.isFinite(totalSeconds) ? Math.max(0, Math.round(totalSeconds)) : 0;
+  return `${Math.floor(safeSeconds / 60)}:${pad(safeSeconds % 60)}`;
+}
+
+/**
  * Formaterer tiden indtil `target` som tt:mm:ss. Tidspunkter i fortiden
  * vises som 00:00:00 i stedet for at tælle negativt.
  */

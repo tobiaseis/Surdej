@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { formatCountdown, getGreeting, mergeDatePart, mergeTimePart } from './dateTime';
+import {
+  formatCountdown,
+  formatMinutesSeconds,
+  getGreeting,
+  mergeDatePart,
+  mergeTimePart,
+} from './dateTime';
 
 describe('dateTime helpers', () => {
   it('changes the calendar date without changing the selected time', () => {
@@ -37,6 +43,19 @@ describe('formatCountdown', () => {
     const target = new Date('2026-06-03T08:00:00.000Z');
 
     assert.equal(formatCountdown(target, now), '00:00:00');
+  });
+});
+
+describe('formatMinutesSeconds', () => {
+  it('formats a brew time as m:ss', () => {
+    assert.equal(formatMinutesSeconds(150), '2:30');
+    assert.equal(formatMinutesSeconds(45), '0:45');
+    assert.equal(formatMinutesSeconds(0), '0:00');
+  });
+
+  it('falls back to zero for missing or negative values', () => {
+    assert.equal(formatMinutesSeconds(-10), '0:00');
+    assert.equal(formatMinutesSeconds(Number.NaN), '0:00');
   });
 });
 

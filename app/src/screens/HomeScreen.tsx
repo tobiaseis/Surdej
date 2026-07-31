@@ -121,6 +121,12 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
         <Text style={typography.h2}>Planlæg en bagning</Text>
         <Text style={[typography.body, { marginBottom: spacing.lg }]}>Vælg hvad du vil bage, og hvornår det skal være klar.</Text>
         <Button title="Start ny bageplan" onPress={() => navigation.navigate('Opskrifter')} />
+        <Button
+          title="Beregn mel, vand og surdej"
+          variant="outline"
+          style={{ marginTop: spacing.md }}
+          onPress={() => navigation.navigate('Opskrifter', { screen: 'Beregner' })}
+        />
       </Card>
 
       {(loadingSuggestions || suggestions.length > 0) && (

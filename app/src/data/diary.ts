@@ -1,5 +1,5 @@
-import { decode } from 'base64-arraybuffer';
 import { supabase } from '../utils/supabase';
+import { uploadImage } from './storage';
 import { formatIsoDate, formatLongDate } from '../utils/dateTime';
 
 const DIARY_IMAGE_BUCKET = 'diary_images';
@@ -63,36 +63,9 @@ export const fetchDiaryEntries = async (): Promise<DiaryLoadResult> => {
   }
 };
 
-/**
- * Uploader et billede (som base64 fra expo-image-picker) til Supabase Storage
- * og returnerer den offentlige URL. Returnerer null ved fejl.
- */
-export const uploadDiaryImage = async (base64: string, ext = 'jpg'): Promise<string | null> => {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    const folder = user?.id ?? 'anon';
-    const path = `${folder}/${Date.now()}.${ext}`;
-    const contentType = ext === 'png' ? 'image/png' : 'image/jpeg';
-
-    const { error } = await supabase.storage
-      .from(DIARY_IMAGE_BUCKET)
-      .upload(path, decode(base64), { contentType, upsert: false });
-
-    if (error) {
-      console.warn('Kunne ikke uploade billede:', error.message);
-      return null;
-    }
-
-    const { data } = supabase.storage.from(DIARY_IMAGE_BUCKET).getPublicUrl(path);
-    return data.publicUrl;
-  } catch (err) {
-    console.error('Netværks- eller Supabase-fejl ved billed-upload.', err);
-    return null;
-  }
-};
+/** Uploader et bagebillede og returnerer den offentlige URL – null ved fejl. */
+export const uploadDiaryImage = (base64: string, ext = 'jpg') =>
+  uploadImage(DIARY_IMAGE_BUCKET, base64, ext);
 
 /**
  * Bygger en simpel tekst-eksport af alle dagbogsindlæg, som kan deles.

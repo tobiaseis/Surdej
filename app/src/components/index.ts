@@ -1,9 +1,14 @@
 export { BottomBar } from './BottomBar';
 export { Button } from './Button';
 export { Card } from './Card';
+export { PhotoPicker } from './PhotoPicker';
+export type { PickedPhoto } from './PhotoPicker';
+export { RatingScale } from './RatingScale';
 export { Screen } from './Screen';
 export { Segmented } from './Segmented';
 export type { SegmentedOption } from './Segmented';
 export { StatusBadge } from './StatusBadge';
+export { Stepper } from './Stepper';
+export { TextField } from './TextField';
 export { Timeline } from './Timeline';
 export { VideoPlayer } from './VideoPlayer';

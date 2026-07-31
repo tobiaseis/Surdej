@@ -22,6 +22,8 @@ export type RecipeStackParamList = {
   OpskriftListe: undefined;
   OpskriftDetaljer: { recipe: Recipe };
   SetupOpskrift: { recipe: Recipe };
+  /** Uden opskrift starter beregneren på standardforholdene. */
+  Beregner: { recipe?: Recipe } | undefined;
   PlanOversigt: {
     recipe: Recipe;
     /** ISO-streng, fordi Date ikke kan serialiseres i navigation-params. */
@@ -31,12 +33,18 @@ export type RecipeStackParamList = {
   };
 };
 
+export type CoffeeStackParamList = {
+  KaffeListe: undefined;
+  KaffeNy: undefined;
+};
+
 // `| undefined` gør det muligt at gå til en fane uden at pege på en bestemt
 // skærm i den, fx navigate('Opskrifter').
 export type MainTabParamList = {
   Hjem: NavigatorScreenParams<HomeStackParamList> | undefined;
   Opskrifter: NavigatorScreenParams<RecipeStackParamList> | undefined;
   Dagbog: undefined;
+  Kaffe: NavigatorScreenParams<CoffeeStackParamList> | undefined;
   Hjælp: undefined;
 };
 
@@ -68,6 +76,11 @@ export type HomeStackScreenProps<T extends keyof HomeStackParamList> = Composite
 
 export type RecipeStackScreenProps<T extends keyof RecipeStackParamList> = CompositeScreenProps<
   NativeStackScreenProps<RecipeStackParamList, T>,
+  MainTabScreenProps<keyof MainTabParamList>
+>;
+
+export type CoffeeStackScreenProps<T extends keyof CoffeeStackParamList> = CompositeScreenProps<
+  NativeStackScreenProps<CoffeeStackParamList, T>,
   MainTabScreenProps<keyof MainTabParamList>
 >;
 

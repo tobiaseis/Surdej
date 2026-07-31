@@ -41,8 +41,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Surdejsmakkeren bruger dine billeder, så du kan gemme et foto af dit bagværk i dagbogen.",
-          "cameraPermission": "Surdejsmakkeren bruger kameraet, så du kan tage et foto af dit bagværk til dagbogen.",
+          "photosPermission": "Surdejsmakkeren bruger dine billeder, så du kan gemme et foto af dit bagværk eller din kaffe i dagbogen.",
+          "cameraPermission": "Surdejsmakkeren bruger kameraet, så du kan tage et foto af dit bagværk eller din kaffe til dagbogen.",
           "microphonePermission": false
         }
       ],
@@ -50,8 +50,13 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "049e337f-de97-40bf-829c-8de31cc4aea6"
+        "projectId": "3213c3b8-d2f4-455b-8d7e-d3240a645785"
+      },
+      "expo-navigation-bar": {
+        "style": "light",
+        "hidden": true
       }
-    }
+    },
+    "owner": "tobiaseis"
   }
 }

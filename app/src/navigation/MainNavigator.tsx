@@ -4,10 +4,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { PlatformPressable } from '@react-navigation/elements';
-import { Home, BookOpen, Book, HelpCircle } from 'lucide-react-native';
+import { Home, BookOpen, Book, Coffee, HelpCircle } from 'lucide-react-native';
 import { colors } from '../theme';
 import { useSettingsHydrated, useSettingsStore } from '../store/settingsStore';
 import type {
+  CoffeeStackParamList,
   HomeStackParamList,
   MainTabParamList,
   RecipeStackParamList,
@@ -23,14 +24,18 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
 import { RecipeDetailScreen } from '../screens/RecipeDetailScreen';
 import { SetupScreen } from '../screens/SetupScreen';
+import { DoughCalculatorScreen } from '../screens/DoughCalculatorScreen';
 import { PlanOverviewScreen } from '../screens/PlanOverviewScreen';
 import { DiaryScreen } from '../screens/DiaryScreen';
+import { CoffeeScreen } from '../screens/CoffeeScreen';
+import { CoffeeEntryScreen } from '../screens/CoffeeEntryScreen';
 import { SosScreen } from '../screens/SosScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
+const CoffeeStack = createNativeStackNavigator<CoffeeStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -52,8 +57,18 @@ const RecipeStackNavigator = () => {
       <RecipeStack.Screen name="OpskriftListe" component={RecipeListScreen} />
       <RecipeStack.Screen name="OpskriftDetaljer" component={RecipeDetailScreen} />
       <RecipeStack.Screen name="SetupOpskrift" component={SetupScreen} />
+      <RecipeStack.Screen name="Beregner" component={DoughCalculatorScreen} />
       <RecipeStack.Screen name="PlanOversigt" component={PlanOverviewScreen} />
     </RecipeStack.Navigator>
+  );
+};
+
+const CoffeeStackNavigator = () => {
+  return (
+    <CoffeeStack.Navigator screenOptions={{ headerShown: false }}>
+      <CoffeeStack.Screen name="KaffeListe" component={CoffeeScreen} />
+      <CoffeeStack.Screen name="KaffeNy" component={CoffeeEntryScreen} />
+    </CoffeeStack.Navigator>
   );
 };
 
@@ -92,6 +107,13 @@ const MainTabs = () => {
         component={DiaryScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Book color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Kaffe"
+        component={CoffeeStackNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Coffee color={color} size={size} />,
         }}
       />
       <Tab.Screen
