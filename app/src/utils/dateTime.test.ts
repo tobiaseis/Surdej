@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
   formatCountdown,
+  formatDurationMinutes,
   formatMinutesSeconds,
   getGreeting,
   mergeDatePart,
@@ -21,6 +22,14 @@ describe('dateTime helpers', () => {
     const selectedTime = new Date('2026-06-01T14:45:00.000Z');
 
     assert.equal(mergeTimePart(current, selectedTime).toISOString(), '2026-06-03T14:45:00.000Z');
+  });
+
+  it('writes durations the way a recipe does', () => {
+    assert.equal(formatDurationMinutes(45), '45 min');
+    assert.equal(formatDurationMinutes(240), '4 t');
+    assert.equal(formatDurationMinutes(90), '1 t 30 min');
+    assert.equal(formatDurationMinutes(0), '0 min');
+    assert.equal(formatDurationMinutes(-5), '0 min');
   });
 });
 

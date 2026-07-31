@@ -20,6 +20,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { ActiveBakeScreen } from '../screens/ActiveBakeScreen';
 import { CompletionScreen } from '../screens/CompletionScreen';
 import { TechniqueGuideScreen } from '../screens/TechniqueGuideScreen';
+import { StarterFeedScreen } from '../screens/StarterFeedScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
 import { RecipeDetailScreen } from '../screens/RecipeDetailScreen';
@@ -46,6 +47,7 @@ const HomeStackNavigator = () => {
       <HomeStack.Screen name="AktivBagning" component={ActiveBakeScreen} />
       <HomeStack.Screen name="Teknik" component={TechniqueGuideScreen} />
       <HomeStack.Screen name="Færdig" component={CompletionScreen} />
+      <HomeStack.Screen name="Fodring" component={StarterFeedScreen} />
       <HomeStack.Screen name="Indstillinger" component={SettingsScreen} />
     </HomeStack.Navigator>
   );

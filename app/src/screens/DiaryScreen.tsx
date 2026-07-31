@@ -4,7 +4,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { colors, radius, spacing, typography } from '../theme';
 import { Button, Card, Screen, StatusBadge } from '../components';
 import { fetchDiaryEntries, DiaryEntry } from '../data/diary';
-import { formatIsoDate } from '../utils/dateTime';
+import { formatDurationMinutes, formatIsoDate } from '../utils/dateTime';
+import { DiaryRecipe, formatBakeConditions } from '../utils/diaryRecipe';
 
 const formatRating = (crumb: number | null, taste: number | null) => {
   const parts: string[] = [];
@@ -13,10 +14,64 @@ const formatRating = (crumb: number | null, taste: number | null) => {
   return parts.join(' · ');
 };
 
+/**
+ * Hele opskriften som den blev bagt. Foldet sammen som standard, så listen
+ * stadig kan skimmes – det er først når hun vil bage den igen, at trinnene
+ * er interessante.
+ */
+const SavedRecipe = ({ recipe }: { recipe: DiaryRecipe }) => {
+  const conditions = formatBakeConditions(recipe);
+
+  return (
+    <View style={styles.recipeBlock}>
+      {(recipe.yield || conditions) && (
+        <Text style={[typography.bodySmall, styles.recipeMeta]}>
+          {[recipe.yield, conditions].filter(Boolean).join(' · ')}
+        </Text>
+      )}
+
+      {recipe.ingredients.length > 0 && (
+        <>
+          <Text style={[typography.label, styles.recipeHeading]}>Ingredienser</Text>
+          {recipe.ingredients.map((ingredient, index) => (
+            <Text key={index} style={typography.bodySmall}>
+              • {ingredient}
+            </Text>
+          ))}
+        </>
+      )}
+
+      {recipe.tools.length > 0 && (
+        <>
+          <Text style={[typography.label, styles.recipeHeading]}>Du skal bruge</Text>
+          <Text style={typography.bodySmall}>{recipe.tools.join(', ')}</Text>
+        </>
+      )}
+
+      {recipe.steps.length > 0 && (
+        <>
+          <Text style={[typography.label, styles.recipeHeading]}>Fremgangsmåde</Text>
+          {recipe.steps.map((step, index) => (
+            <View key={index} style={styles.stepRow}>
+              <Text style={typography.bodySmall}>
+                {index + 1}. {step.title} · {formatDurationMinutes(step.durationMinutes)}
+              </Text>
+              {step.description ? (
+                <Text style={[typography.bodySmall, styles.stepDescription]}>{step.description}</Text>
+              ) : null}
+            </View>
+          ))}
+        </>
+      )}
+    </View>
+  );
+};
+
 export const DiaryScreen = () => {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const load = useCallback(async (isActive: () => boolean = () => true) => {
     setLoading(true);
@@ -64,6 +119,7 @@ export const DiaryScreen = () => {
       ) : (
         entries.map((entry) => {
           const ratingText = formatRating(entry.crumbRating, entry.tasteRating);
+          const isExpanded = expandedId === entry.id;
           return (
             <Card key={entry.id} style={styles.entryCard}>
               {entry.imageUrl ? (
@@ -85,6 +141,22 @@ export const DiaryScreen = () => {
               {entry.note ? (
                 <Text style={[typography.body, { fontStyle: 'italic', color: colors.textSub }]}>"{entry.note}"</Text>
               ) : null}
+
+              {entry.recipe ? (
+                <>
+                  {isExpanded && <SavedRecipe recipe={entry.recipe} />}
+                  <Button
+                    title={isExpanded ? 'Skjul opskrift' : 'Vis opskrift'}
+                    variant="outline"
+                    style={{ marginTop: spacing.lg }}
+                    onPress={() => setExpandedId(isExpanded ? null : entry.id)}
+                  />
+                </>
+              ) : (
+                <Text style={[typography.bodySmall, styles.noRecipe]}>
+                  Opskriften blev ikke gemt med dette indlæg.
+                </Text>
+              )}
             </Card>
           );
         })
@@ -121,5 +193,29 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: colors.textSub,
     marginHorizontal: spacing.sm,
+  },
+  recipeBlock: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  recipeMeta: {
+    marginBottom: spacing.sm,
+  },
+  recipeHeading: {
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
+    color: colors.textMain,
+  },
+  stepRow: {
+    marginBottom: spacing.sm,
+  },
+  stepDescription: {
+    marginLeft: spacing.md,
+  },
+  noRecipe: {
+    marginTop: spacing.md,
+    fontStyle: 'italic',
   },
 });

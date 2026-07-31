@@ -69,6 +69,20 @@ export function formatMinutesSeconds(totalSeconds: number): string {
 }
 
 /**
+ * Formaterer en varighed i minutter som "45 min", "4 t" eller "1 t 30 min" –
+ * altså sådan som en varighed står i en opskrift.
+ */
+export function formatDurationMinutes(minutes: number): string {
+  const safeMinutes = Number.isFinite(minutes) ? Math.max(0, Math.round(minutes)) : 0;
+  const hours = Math.floor(safeMinutes / 60);
+  const rest = safeMinutes % 60;
+
+  if (hours === 0) return `${rest} min`;
+  if (rest === 0) return `${hours} t`;
+  return `${hours} t ${rest} min`;
+}
+
+/**
  * Formaterer tiden indtil `target` som tt:mm:ss. Tidspunkter i fortiden
  * vises som 00:00:00 i stedet for at tælle negativt.
  */

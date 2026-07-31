@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Text, Alert } from 'react-native';
 import { spacing, typography } from '../theme';
 import { Button, Card, PhotoPicker, RatingScale, Screen, TextField } from '../components';
 import { useBakeStore } from '../store/bakeStore';
 import { saveDiaryEntry, uploadDiaryImage } from '../data/diary';
+import { buildDiaryRecipe } from '../utils/diaryRecipe';
 import type { HomeStackScreenProps } from '../navigation/types';
 
 export const CompletionScreen = ({ navigation }: HomeStackScreenProps<'Færdig'>) => {
@@ -11,6 +12,12 @@ export const CompletionScreen = ({ navigation }: HomeStackScreenProps<'Færdig'>
 
   const recipeName = activeBake?.recipe.name ?? 'Din bagning';
   const defaultTemp = activeBake ? `${activeBake.options.roomTempC}°C` : '';
+
+  // Opskriften fryses ned, som den blev bagt – med de tider planen endte med.
+  const recipeSnapshot = useMemo(
+    () => (activeBake ? buildDiaryRecipe(activeBake) : undefined),
+    [activeBake]
+  );
 
   const [crumb, setCrumb] = useState(0);
   const [taste, setTaste] = useState(0);
@@ -40,6 +47,7 @@ export const CompletionScreen = ({ navigation }: HomeStackScreenProps<'Færdig'>
       tasteRating: taste || undefined,
       note: note || undefined,
       imageUrl,
+      recipe: recipeSnapshot,
     });
     setSaving(false);
 
@@ -84,6 +92,7 @@ export const CompletionScreen = ({ navigation }: HomeStackScreenProps<'Færdig'>
       <Text style={typography.h1}>{recipeName} er færdig 🎉</Text>
       <Text style={[typography.body, { marginBottom: spacing.xl }]}>
         Godt klaret! Gem resultatet, så du kan sammenligne næste gang.
+        {recipeSnapshot ? ' Hele opskriften gemmes med – ingredienser, trin og tider.' : ''}
       </Text>
 
       <PhotoPicker

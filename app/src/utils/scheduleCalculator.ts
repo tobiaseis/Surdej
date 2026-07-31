@@ -22,6 +22,19 @@ const STARTER_FACTORS: Record<StarterStrength, number> = {
   slow: 1.2,
 };
 
+/**
+ * Hvor meget længere (>1) eller kortere (<1) en hævning tager ved en given
+ * rumtemperatur. Fodrings-beregneren bruger den samme faktor, så en kold
+ * køkkenbord-dag flytter fodring og hævning lige meget.
+ */
+export function getTemperatureFactor(roomTempC: number): number {
+  return Math.pow(2, (REFERENCE_TEMP_C - roomTempC) / TEMP_DOUBLING_C);
+}
+
+export function getStarterFactor(strength: StarterStrength): number {
+  return STARTER_FACTORS[strength];
+}
+
 export type ScheduledStep = RecipeStep & {
   adjustedDurationMinutes: number;
   scheduledAt: Date;
@@ -44,8 +57,8 @@ export type ActiveBake = {
 export function getAdjustedStepDuration(step: RecipeStep, options: ScheduleOptions = DEFAULT_SCHEDULE_OPTIONS): number {
   if (!step.temperatureSensitive) return step.durationMinutes;
 
-  const tempFactor = Math.pow(2, (REFERENCE_TEMP_C - options.roomTempC) / TEMP_DOUBLING_C);
-  const starterFactor = STARTER_FACTORS[options.starterStrength];
+  const tempFactor = getTemperatureFactor(options.roomTempC);
+  const starterFactor = getStarterFactor(options.starterStrength);
   const adjusted = step.durationMinutes * tempFactor * starterFactor;
 
   // Rund til nærmeste 5 minutter for pæne tider, minimum 5 minutter.

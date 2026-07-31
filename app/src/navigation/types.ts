@@ -15,6 +15,7 @@ export type HomeStackParamList = {
   AktivBagning: undefined;
   Teknik: { step: RecipeStep };
   Færdig: undefined;
+  Fodring: undefined;
   Indstillinger: undefined;
 };
 

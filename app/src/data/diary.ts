@@ -1,6 +1,7 @@
 import { supabase } from '../utils/supabase';
 import { uploadImage } from './storage';
 import { formatIsoDate, formatLongDate } from '../utils/dateTime';
+import { DiaryRecipe, formatDiaryRecipeLines, parseDiaryRecipe } from '../utils/diaryRecipe';
 
 const DIARY_IMAGE_BUCKET = 'diary_images';
 
@@ -13,6 +14,8 @@ export type DiaryEntry = {
   tasteRating: number | null;
   note: string | null;
   imageUrl: string | null;
+  /** Hele opskriften som den blev bagt. Null på indlæg gemt før den blev gemt med. */
+  recipe: DiaryRecipe | null;
 };
 
 export type NewDiaryEntry = {
@@ -22,6 +25,7 @@ export type NewDiaryEntry = {
   tasteRating?: number;
   note?: string;
   imageUrl?: string;
+  recipe?: DiaryRecipe;
 };
 
 const mapDbEntry = (row: any): DiaryEntry => ({
@@ -33,6 +37,7 @@ const mapDbEntry = (row: any): DiaryEntry => ({
   tasteRating: row.taste_rating ?? null,
   note: row.note ?? null,
   imageUrl: row.image_url ?? null,
+  recipe: parseDiaryRecipe(row.recipe),
 });
 
 /**
@@ -85,6 +90,7 @@ export const buildDiaryExport = (entries: DiaryEntry[]): string => {
       entry.temp ? `  Temperatur: ${entry.temp}` : null,
       ratings.length ? `  ${ratings.join(' · ')}` : null,
       entry.note ? `  Note: ${entry.note}` : null,
+      ...(entry.recipe ? formatDiaryRecipeLines(entry.recipe) : []),
     ]
       .filter(Boolean)
       .join('\n');
@@ -92,6 +98,13 @@ export const buildDiaryExport = (entries: DiaryEntry[]): string => {
 
   return ['Min surdejs-dagbog', '', ...lines].join('\n');
 };
+
+/**
+ * PostgREST svarer PGRST204, når en kolonne ikke findes i skemaet – fx fordi
+ * migrationen, der tilføjer den, ikke er kørt i det Supabase-projekt endnu.
+ */
+const isMissingRecipeColumn = (error: { code?: string; message?: string }): boolean =>
+  error.code === 'PGRST204' && (error.message ?? '').includes('recipe');
 
 export const saveDiaryEntry = async (entry: NewDiaryEntry): Promise<boolean> => {
   try {
@@ -104,7 +117,7 @@ export const saveDiaryEntry = async (entry: NewDiaryEntry): Promise<boolean> => 
       return false;
     }
 
-    const { error } = await supabase.from('diary_entries').insert({
+    const row = {
       user_id: user.id,
       recipe_name: entry.recipeName,
       temp: entry.temp ?? null,
@@ -112,14 +125,30 @@ export const saveDiaryEntry = async (entry: NewDiaryEntry): Promise<boolean> => 
       taste_rating: entry.tasteRating ?? null,
       note: entry.note ?? null,
       image_url: entry.imageUrl ?? null,
-    });
+      recipe: entry.recipe ?? null,
+    };
 
-    if (error) {
-      console.warn('Kunne ikke gemme dagbogsindlæg:', error.message);
+    const { error } = await supabase.from('diary_entries').insert(row);
+
+    if (!error) return true;
+
+    // Er migration 04 ikke kørt endnu, findes recipe-kolonnen ikke. Så er det
+    // vigtigere at redde indlægget end opskriften – hun har lige bagt.
+    if (isMissingRecipeColumn(error)) {
+      const { recipe, ...withoutRecipe } = row;
+      const retry = await supabase.from('diary_entries').insert(withoutRecipe);
+
+      if (!retry.error) {
+        console.warn('Gemt uden opskrift – kør migration 04_diary_recipe.sql i Supabase.');
+        return true;
+      }
+
+      console.warn('Kunne ikke gemme dagbogsindlæg:', retry.error.message);
       return false;
     }
 
-    return true;
+    console.warn('Kunne ikke gemme dagbogsindlæg:', error.message);
+    return false;
   } catch (err) {
     console.error('Netværks- eller Supabase-fejl ved gemning af dagbog.', err);
     return false;
