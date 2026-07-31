@@ -1,58 +1,47 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
+import { colors, fonts, radius, typography } from '../theme';
 
-type BadgeStatus = 'active' | 'delayed' | 'completed' | 'info';
+/**
+ * Badges er rent visuelle. Tidligere hed varianterne efter tilstande
+ * ('completed', 'delayed'), hvilket førte til at fx sværhedsgraden "Svær"
+ * blev vist i grøn "udført"-farve.
+ */
+export type BadgeTone = 'neutral' | 'accent' | 'positive' | 'warning';
 
 interface StatusBadgeProps {
   label: string;
-  status: BadgeStatus;
+  tone?: BadgeTone;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, status }) => {
-  const getBackgroundColor = () => {
-    switch (status) {
-      case 'active':
-        return colors.secondary;
-      case 'completed':
-        return colors.success;
-      case 'delayed':
-        return colors.warning;
-      case 'info':
-        return colors.border;
-      default:
-        return colors.border;
-    }
-  };
-
-  const getTextColor = () => {
-    if (status === 'info') return colors.textMain;
-    return '#FFF';
-  };
-
-  return (
-    <View style={[styles.badge, { backgroundColor: getBackgroundColor() }]}>
-      <Text style={[styles.badgeText, { color: getTextColor() }]}>
-        {label}
-      </Text>
-    </View>
-  );
+const BACKGROUNDS: Record<BadgeTone, string> = {
+  neutral: colors.border,
+  accent: colors.secondary,
+  positive: colors.success,
+  warning: colors.warning,
 };
+
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ label, tone = 'neutral' }) => (
+  <View style={[styles.badge, { backgroundColor: BACKGROUNDS[tone] }]}>
+    <Text style={[styles.badgeText, { color: tone === 'neutral' ? colors.textMain : colors.onPrimary }]}>
+      {label}
+    </Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 100,
+    borderRadius: radius.pill,
     alignSelf: 'flex-start',
     maxWidth: '100%',
   },
   badgeText: {
     ...typography.bodySmall,
+    fontFamily: fonts.sansSemiBold,
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: '600',
     includeFontPadding: false,
   },
 });

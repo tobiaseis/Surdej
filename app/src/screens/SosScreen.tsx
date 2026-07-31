@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { colors, fonts, spacing, typography } from '../theme';
+import { Button, Card, Screen } from '../components';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import { useBakeStore } from '../store/bakeStore';
 
@@ -44,85 +41,95 @@ const sosIssues = [
   }
 ];
 
+type Feedback = { issueId: string; message: string; tone: 'success' | 'warning' };
+
 export const SosScreen = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  // Feedback bindes til det kort, den kom fra, så beskeden ikke dukker op
+  // igen under et andet problem.
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const { activeBake, delayBake } = useBakeStore();
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
+    setFeedback(null);
   };
 
-  const handleAdjustPlan = () => {
+  const handleAdjustPlan = (issueId: string) => {
     if (!activeBake) {
-      setFeedback('Du har ingen aktiv bagning at justere lige nu.');
+      setFeedback({
+        issueId,
+        message: 'Du har ingen aktiv bagning at justere lige nu.',
+        tone: 'warning',
+      });
       return;
     }
     delayBake(ADJUST_MINUTES);
-    setFeedback(`Vi har givet dejen ${ADJUST_MINUTES} minutter mere. Resten af planen er rykket.`);
+    setFeedback({
+      issueId,
+      message: `Vi har givet dejen ${ADJUST_MINUTES} minutter mere. Resten af planen er rykket.`,
+      tone: 'success',
+    });
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={typography.h1}>Hvad driller?</Text>
-        <Text style={[typography.body, { marginBottom: 24 }]}>Få hurtig hjælp til de mest almindelige problemer.</Text>
+    <Screen>
+      <Text style={typography.h1}>Hvad driller?</Text>
+      <Text style={[typography.body, { marginBottom: spacing.xl }]}>Få hurtig hjælp til de mest almindelige problemer.</Text>
 
-        {sosIssues.map((issue) => {
-          const isExpanded = expandedId === issue.id;
-          
-          return (
-            <TouchableOpacity key={issue.id} onPress={() => toggleExpand(issue.id)} activeOpacity={0.94}>
-              <Card style={styles.issueCard}>
-                <View style={styles.cardHeader}>
-                  <Text style={typography.h3}>{issue.title}</Text>
-                  {isExpanded ? <ChevronUp color={colors.textMain} size={20} /> : <ChevronDown color={colors.textMain} size={20} />}
+      {sosIssues.map((issue) => {
+        const isExpanded = expandedId === issue.id;
+
+        return (
+          <TouchableOpacity
+            key={issue.id}
+            onPress={() => toggleExpand(issue.id)}
+            activeOpacity={0.94}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: isExpanded }}
+          >
+            <Card style={styles.issueCard}>
+              <View style={styles.cardHeader}>
+                <Text style={typography.h3}>{issue.title}</Text>
+                {isExpanded ? <ChevronUp color={colors.textMain} size={20} /> : <ChevronDown color={colors.textMain} size={20} />}
+              </View>
+
+              {isExpanded && (
+                <View style={styles.expandedContent}>
+                  <Text style={[typography.bodySmall, styles.sectionLabel]}>Mulige årsager:</Text>
+                  {issue.causes.map((cause, idx) => (
+                    <Text key={idx} style={[typography.bodySmall, styles.listItem]}>• {cause}</Text>
+                  ))}
+
+                  <Text style={[typography.bodySmall, styles.sectionLabel, { marginTop: spacing.lg }]}>Hvad du kan gøre nu:</Text>
+                  {issue.solutions.map((solution, idx) => (
+                    <Text key={idx} style={[typography.bodySmall, styles.listItem]}>{idx + 1}. {solution}</Text>
+                  ))}
+
+                  <Button
+                    title="Tilpas min aktuelle plan"
+                    variant="outline"
+                    style={{ marginTop: spacing.lg }}
+                    onPress={() => handleAdjustPlan(issue.id)}
+                  />
+                  {feedback?.issueId === issue.id && (
+                    <Text style={[typography.bodySmall, { marginTop: spacing.md, color: colors[feedback.tone] }]}>
+                      {feedback.message}
+                    </Text>
+                  )}
                 </View>
-                
-                {isExpanded && (
-                  <View style={styles.expandedContent}>
-                    <Text style={[typography.bodySmall, { fontWeight: '600', marginBottom: 8 }]}>Mulige årsager:</Text>
-                    {issue.causes.map((cause, idx) => (
-                      <Text key={idx} style={[typography.bodySmall, { marginBottom: 4 }]}>• {cause}</Text>
-                    ))}
-                    
-                    <Text style={[typography.bodySmall, { fontWeight: '600', marginTop: 16, marginBottom: 8 }]}>Hvad du kan gøre nu:</Text>
-                    {issue.solutions.map((solution, idx) => (
-                      <Text key={idx} style={[typography.bodySmall, { marginBottom: 4 }]}>{idx + 1}. {solution}</Text>
-                    ))}
-
-                    <Button
-                      title="Tilpas min aktuelle plan"
-                      variant="outline"
-                      style={{ marginTop: 16 }}
-                      onPress={handleAdjustPlan}
-                    />
-                    {feedback && (
-                      <Text style={[typography.bodySmall, { marginTop: 12, color: colors.success }]}>{feedback}</Text>
-                    )}
-                  </View>
-                )}
-              </Card>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-    </SafeAreaView>
+              )}
+            </Card>
+          </TouchableOpacity>
+        );
+      })}
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 24,
-  },
   issueCard: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -130,9 +137,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   expandedContent: {
-    marginTop: 16,
-    paddingTop: 16,
+    marginTop: spacing.lg,
+    paddingTop: spacing.lg,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-  }
+  },
+  sectionLabel: {
+    fontFamily: fonts.sansSemiBold,
+    marginBottom: spacing.sm,
+  },
+  listItem: {
+    marginBottom: spacing.xs,
+  },
 });

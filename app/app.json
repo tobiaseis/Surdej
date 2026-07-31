@@ -45,7 +45,8 @@
           "cameraPermission": "Surdejsmakkeren bruger kameraet, så du kan tage et foto af dit bagværk til dagbogen.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {

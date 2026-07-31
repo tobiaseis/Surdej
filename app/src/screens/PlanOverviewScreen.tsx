@@ -1,33 +1,26 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Modal } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import type { Recipe } from '../data/recipes';
+import { View, Text, StyleSheet, Modal } from 'react-native';
+import { colors, layout, spacing, typography } from '../theme';
+import { BottomBar, Button, Card, Screen, Timeline } from '../components';
 import {
   ScheduleOptions,
-  StarterStrength,
   calculateSchedule,
   getEarliestTargetEndTime,
   isTargetEndTimeFeasible,
 } from '../utils/scheduleCalculator';
 import { useBakeStore } from '../store/bakeStore';
 import { requestNotificationPermission } from '../utils/notifications';
+import { formatDateTime, formatWeekdayTime } from '../utils/dateTime';
+import type { RecipeStackScreenProps } from '../navigation/types';
 
-export const PlanOverviewScreen = () => {
-  const navigation = useNavigation<any>();
-  const route = useRoute<any>();
+export const PlanOverviewScreen = ({ navigation, route }: RecipeStackScreenProps<'PlanOversigt'>) => {
   const { startBake } = useBakeStore();
 
-  const recipe = route.params?.recipe as Recipe | undefined;
-  const targetTimeIso = route.params?.targetTime;
-  const options: ScheduleOptions = {
-    roomTempC: route.params?.roomTempC ?? 21,
-    starterStrength: (route.params?.starterStrength as StarterStrength) ?? 'normal',
-  };
+  const { recipe, targetTime: targetTimeIso, roomTempC, starterStrength } = route.params;
+  const options = useMemo<ScheduleOptions>(
+    () => ({ roomTempC, starterStrength }),
+    [roomTempC, starterStrength]
+  );
 
   const targetTime = targetTimeIso ? new Date(targetTimeIso) : null;
   const canCreatePlan = recipe && targetTime ? isTargetEndTimeFeasible(recipe, targetTime, new Date(), options) : false;
@@ -36,34 +29,26 @@ export const PlanOverviewScreen = () => {
   const [permissionVisible, setPermissionVisible] = useState(false);
 
   const calculatedPlan = useMemo(() => {
-    if (!recipe || !targetTimeIso) return null;
-    if (!canCreatePlan || !targetTime) return null;
-    return calculateSchedule(recipe, targetTime, options);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canCreatePlan, recipe, targetTimeIso, options.roomTempC, options.starterStrength]);
+    if (!recipe || !targetTimeIso || !canCreatePlan) return null;
+    return calculateSchedule(recipe, new Date(targetTimeIso), options);
+  }, [canCreatePlan, recipe, targetTimeIso, options]);
 
   if (!recipe || !targetTimeIso) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Text style={typography.h2}>Kunne ikke beregne plan.</Text>
-        </View>
-      </SafeAreaView>
+      <Screen scroll={false}>
+        <Text style={typography.h2}>Kunne ikke beregne plan.</Text>
+      </Screen>
     );
   }
 
   if (!calculatedPlan) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Text style={typography.h2}>Tidspunktet er for tidligt.</Text>
-          {earliestTarget && (
-            <Text style={typography.body}>
-              Vælg tidligst {earliestTarget.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.
-            </Text>
-          )}
-        </View>
-      </SafeAreaView>
+      <Screen scroll={false}>
+        <Text style={typography.h2}>Tidspunktet er for tidligt.</Text>
+        {earliestTarget && (
+          <Text style={typography.body}>Vælg tidligst {formatDateTime(earliestTarget)}.</Text>
+        )}
+      </Screen>
     );
   }
 
@@ -73,41 +58,19 @@ export const PlanOverviewScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <>
+      <Screen withBottomBar>
         <Text style={typography.h1}>Din bageplan er klar</Text>
-        <Text style={[typography.body, { marginBottom: 24 }]}>
-          {recipe.name} er planlagt til {new Date(targetTimeIso).toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' })}.
+        <Text style={[typography.body, { marginBottom: spacing.xl }]}>
+          {recipe.name} er planlagt til {formatWeekdayTime(new Date(targetTimeIso))}.
         </Text>
 
-        <View style={styles.timeline}>
-          {calculatedPlan.steps.map((step, index) => {
-            const isLast = index === calculatedPlan.steps.length - 1;
-            return (
-              <View key={step.id} style={styles.timelineRow}>
-                <View style={styles.timelineLeft}>
-                  <Text style={[typography.bodySmall, { fontWeight: '600' }]}>
-                    {step.scheduledAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                </View>
-                <View style={styles.timelineCenter}>
-                  <View style={styles.dot} />
-                  {!isLast && <View style={styles.line} />}
-                </View>
-                <View style={styles.timelineRight}>
-                  <Text style={typography.h3}>{step.title}</Text>
-                  <Text style={typography.bodySmall}>{step.description}</Text>
-                </View>
-              </View>
-            );
-          })}
-        </View>
-        <View style={{ height: 60 }} />
-      </ScrollView>
+        <Timeline steps={calculatedPlan.steps} />
+      </Screen>
 
-      <View style={styles.bottomBar}>
+      <BottomBar>
         <Button title="Start bageplan" onPress={() => setPermissionVisible(true)} />
-      </View>
+      </BottomBar>
 
       <Modal visible={permissionVisible} transparent animationType="fade" onRequestClose={() => setPermissionVisible(false)}>
         <View style={styles.modalBackdrop}>
@@ -127,7 +90,7 @@ export const PlanOverviewScreen = () => {
             <Button
               title="Ikke nu"
               variant="outline"
-              style={{ marginTop: 12, borderWidth: 0 }}
+              style={{ marginTop: spacing.md, borderWidth: 0 }}
               onPress={() => {
                 setPermissionVisible(false);
                 activateBake();
@@ -136,71 +99,16 @@ export const PlanOverviewScreen = () => {
           </Card>
         </View>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 100,
-  },
-  timeline: {
-    marginTop: 16,
-  },
-  timelineRow: {
-    flexDirection: 'row',
-  },
-  timelineLeft: {
-    width: 60,
-    alignItems: 'flex-end',
-    paddingRight: 12,
-    paddingTop: 2,
-  },
-  timelineCenter: {
-    alignItems: 'center',
-    width: 20,
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.primary,
-    marginTop: 6,
-    zIndex: 1,
-  },
-  line: {
-    width: 2,
-    flex: 1,
-    backgroundColor: colors.border,
-    marginTop: -6,
-    marginBottom: -6,
-  },
-  timelineRight: {
-    flex: 1,
-    paddingLeft: 12,
-    paddingBottom: 32,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
-    padding: 24,
+    padding: layout.screenPaddingHorizontal,
   },
   modalCard: {
     marginBottom: 0,

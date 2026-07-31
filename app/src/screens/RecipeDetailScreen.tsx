@@ -1,34 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import type { Recipe } from '../data/recipes';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { colors, radius, spacing, typography } from '../theme';
+import { BottomBar, Button, Card, Screen } from '../components';
+import { getRecipeTotalHours } from '../utils/recipeMeta';
+import { useSettingsStore } from '../store/settingsStore';
+import type { RecipeStackScreenProps } from '../navigation/types';
 
-export const RecipeDetailScreen = () => {
-  const navigation = useNavigation<any>();
-  const route = useRoute<any>();
-  const recipe = route.params?.recipe as Recipe | undefined;
+export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps<'OpskriftDetaljer'>) => {
+  const recipe = route.params?.recipe;
+
+  const roomTempC = useSettingsStore((state) => state.defaultRoomTempC);
+  const starterStrength = useSettingsStore((state) => state.defaultStarterStrength);
 
   if (!recipe) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <Text style={typography.h2}>Opskrift ikke fundet.</Text>
-        </View>
-      </SafeAreaView>
+      <Screen scroll={false}>
+        <Text style={typography.h2}>Opskrift ikke fundet.</Text>
+      </Screen>
     );
   }
 
-  const totalMinutes = recipe.steps.reduce((sum, step) => sum + step.durationMinutes, 0);
-  const totalHours = Math.round(totalMinutes / 60);
+  const totalHours = getRecipeTotalHours(recipe, { roomTempC, starterStrength });
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <>
+      <Screen withBottomBar>
         {recipe.imageUrl ? (
           <Image source={{ uri: recipe.imageUrl }} style={styles.heroImage} resizeMode="cover" />
         ) : (
@@ -38,10 +34,10 @@ export const RecipeDetailScreen = () => {
         )}
 
         <Text style={typography.h1}>{recipe.name}</Text>
-        <Text style={[typography.body, { marginBottom: 24 }]}>{recipe.description}</Text>
+        <Text style={[typography.body, { marginBottom: spacing.xl }]}>{recipe.description}</Text>
 
         <Card style={styles.infoCard}>
-          <Text style={[typography.h3, { marginBottom: 8 }]}>Information</Text>
+          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Information</Text>
           <Text style={typography.bodySmall}>Total tid: {totalHours} timer</Text>
           <Text style={typography.bodySmall}>Aktiv tid: ~{recipe.handsOnMinutes} min</Text>
           <Text style={typography.bodySmall}>Antal: {recipe.yield}</Text>
@@ -49,41 +45,32 @@ export const RecipeDetailScreen = () => {
         </Card>
 
         <Card style={styles.infoCard}>
-          <Text style={[typography.h3, { marginBottom: 8 }]}>Ingredienser</Text>
+          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Ingredienser</Text>
           {recipe.ingredients.map((ingredient, idx) => (
             <Text key={idx} style={typography.bodySmall}>• {ingredient}</Text>
           ))}
         </Card>
 
         <Card style={styles.infoCard}>
-          <Text style={[typography.h3, { marginBottom: 8 }]}>Du skal bruge</Text>
+          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Du skal bruge</Text>
           {recipe.tools.map((tool, idx) => (
             <Text key={idx} style={typography.bodySmall}>• {tool}</Text>
           ))}
         </Card>
-      </ScrollView>
+      </Screen>
 
-      <View style={styles.bottomBar}>
+      <BottomBar>
         <Button title="Planlæg denne opskrift" onPress={() => navigation.navigate('SetupOpskrift', { recipe })} />
-      </View>
-    </SafeAreaView>
+      </BottomBar>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 100,
-  },
   heroImage: {
     width: '100%',
     height: 200,
-    borderRadius: 16,
+    borderRadius: radius.xl,
     marginBottom: 20,
     backgroundColor: colors.border,
   },
@@ -92,16 +79,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   infoCard: {
-    marginBottom: 16,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-    backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    marginBottom: spacing.lg,
   },
 });

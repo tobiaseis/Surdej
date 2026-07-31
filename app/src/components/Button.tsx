@@ -1,7 +1,6 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
+import { colors, radius, spacing, typography } from '../theme';
 
 interface ButtonProps {
   title: string;
@@ -30,7 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
   const getTextColor = () => {
     if (disabled) return colors.textSub;
     if (variant === 'outline') return colors.primary;
-    return '#FFF';
+    return colors.onPrimary;
   };
 
   return (
@@ -57,9 +56,9 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',

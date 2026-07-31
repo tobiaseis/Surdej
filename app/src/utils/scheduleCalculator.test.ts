@@ -17,16 +17,16 @@ const recipe: Recipe = {
   name: 'Koldhævede Surdejsboller',
   description: 'Klassiske saftige surdejsboller med sprød skorpe.',
   steps: [
-    { id: 'step-1', title: 'Fodr surdej', description: '', durationMinutes: 240, requiresAction: true },
-    { id: 'step-2', title: 'Autolyse', description: '', durationMinutes: 60, requiresAction: true },
-    { id: 'step-3', title: 'Tilsæt surdej & salt', description: '', durationMinutes: 30, requiresAction: true },
-    { id: 'step-4', title: 'Stræk og fold 1', description: '', durationMinutes: 30, requiresAction: true },
-    { id: 'step-5', title: 'Stræk og fold 2', description: '', durationMinutes: 30, requiresAction: true },
-    { id: 'step-6', title: 'Stræk og fold 3', description: '', durationMinutes: 180, requiresAction: true },
-    { id: 'step-7', title: 'I køleskabet', description: '', durationMinutes: 720, requiresAction: true },
-    { id: 'step-8', title: 'Tænd ovnen', description: '', durationMinutes: 45, requiresAction: true },
-    { id: 'step-9', title: 'Bagning', description: '', durationMinutes: 20, requiresAction: true },
-    { id: 'step-10', title: 'Køl af', description: '', durationMinutes: 30, requiresAction: false },
+    { id: 'step-1', title: 'Fodr surdej', description: '', durationMinutes: 240 },
+    { id: 'step-2', title: 'Autolyse', description: '', durationMinutes: 60 },
+    { id: 'step-3', title: 'Tilsæt surdej & salt', description: '', durationMinutes: 30 },
+    { id: 'step-4', title: 'Stræk og fold 1', description: '', durationMinutes: 30 },
+    { id: 'step-5', title: 'Stræk og fold 2', description: '', durationMinutes: 30 },
+    { id: 'step-6', title: 'Stræk og fold 3', description: '', durationMinutes: 180 },
+    { id: 'step-7', title: 'I køleskabet', description: '', durationMinutes: 720 },
+    { id: 'step-8', title: 'Tænd ovnen', description: '', durationMinutes: 45 },
+    { id: 'step-9', title: 'Bagning', description: '', durationMinutes: 20 },
+    { id: 'step-10', title: 'Køl af', description: '', durationMinutes: 30 },
   ],
 };
 
@@ -82,8 +82,8 @@ describe('schedule helpers', () => {
 });
 
 describe('temperature & starter adjustment', () => {
-  const proofStep = { id: 'p', title: 'Hævning', description: '', durationMinutes: 240, requiresAction: true, temperatureSensitive: true };
-  const fixedStep = { id: 'f', title: 'Bagning', description: '', durationMinutes: 20, requiresAction: true };
+  const proofStep = { id: 'p', title: 'Hævning', description: '', durationMinutes: 240, temperatureSensitive: true };
+  const fixedStep = { id: 'f', title: 'Bagning', description: '', durationMinutes: 20 };
 
   it('leaves durations unchanged at the reference (21°C, normal starter)', () => {
     assert.equal(getAdjustedStepDuration(proofStep, { roomTempC: 21, starterStrength: 'normal' }), 240);

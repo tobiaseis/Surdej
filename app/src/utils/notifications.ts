@@ -5,6 +5,7 @@ import notifee, {
   TriggerType,
 } from '@notifee/react-native';
 import type { ScheduledStep } from './scheduleCalculator';
+import { formatTime } from './dateTime';
 
 const TIMER_NOTIFICATION_ID = 'bake-timer';
 const TIMER_CHANNEL_ID = 'bake-timers';
@@ -56,7 +57,7 @@ export const startLiveTimer = async (title: string, targetTime: Date) => {
     await notifee.displayNotification({
       id: TIMER_NOTIFICATION_ID,
       title: `Næste: ${title}`,
-      body: `Tæller ned til ${targetTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+      body: `Tæller ned til ${formatTime(targetTime)}`,
       android: {
         channelId,
         asForegroundService: true,

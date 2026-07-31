@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { Card } from '../components/Card';
-import { StatusBadge } from '../components/StatusBadge';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { colors, spacing, typography } from '../theme';
+import { Card, Screen, StatusBadge } from '../components';
 import { fetchRecipes, Recipe } from '../data/recipes';
 import { getRecipeMetaItems } from '../utils/recipeMeta';
+import { useSettingsStore } from '../store/settingsStore';
+import type { RecipeStackScreenProps } from '../navigation/types';
 
-export const RecipeListScreen = () => {
-  const navigation = useNavigation<any>();
+export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'OpskriftListe'>) => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Vis tiderne under brugerens egne standardforhold, så tallet på kortet
+  // svarer til den plan opskriften faktisk giver.
+  const roomTempC = useSettingsStore((state) => state.defaultRoomTempC);
+  const starterStrength = useSettingsStore((state) => state.defaultStarterStrength);
+  const options = useMemo(() => ({ roomTempC, starterStrength }), [roomTempC, starterStrength]);
 
   useEffect(() => {
     const loadRecipes = async () => {
@@ -25,63 +28,60 @@ export const RecipeListScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={typography.h1}>Hvad vil du bage?</Text>
-        <Text style={[typography.body, { marginBottom: 24 }]}>Vælg en opskrift for at starte en plan.</Text>
+    <Screen>
+      <Text style={typography.h1}>Hvad vil du bage?</Text>
+      <Text style={[typography.body, { marginBottom: spacing.xl }]}>Vælg en opskrift for at starte en plan.</Text>
 
-        {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
-        ) : (
-          recipes.map((recipe) => {
-            const metaItems = getRecipeMetaItems(recipe);
+      {loading ? (
+        <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: spacing.xxxl }} />
+      ) : recipes.length === 0 ? (
+        <Card>
+          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Ingen opskrifter fundet</Text>
+          <Text style={typography.bodySmall}>
+            Der er ingen opskrifter at vise lige nu. Tjek din internetforbindelse, og prøv igen.
+          </Text>
+        </Card>
+      ) : (
+        recipes.map((recipe) => {
+          const metaItems = getRecipeMetaItems(recipe, options);
 
-            return (
-              <TouchableOpacity
-                key={recipe.id}
-                onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
-                activeOpacity={0.94}
-              >
-                <Card style={styles.recipeCard}>
-                  <View style={styles.cardHeader}>
-                    <Text style={typography.h2}>{recipe.name}</Text>
-                  </View>
-                  <Text style={[typography.body, { marginBottom: 12 }]}>{recipe.description}</Text>
+          return (
+            <TouchableOpacity
+              key={recipe.id}
+              onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
+              activeOpacity={0.94}
+              accessibilityRole="button"
+            >
+              <Card style={styles.recipeCard}>
+                <View style={styles.cardHeader}>
+                  <Text style={typography.h2}>{recipe.name}</Text>
+                </View>
+                <Text style={[typography.body, { marginBottom: spacing.md }]}>{recipe.description}</Text>
 
-                  <View style={styles.badges}>
-                    {metaItems.map((item) => (
-                      <StatusBadge key={item.label} label={item.label} status={item.status} />
-                    ))}
-                  </View>
-                </Card>
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
-    </SafeAreaView>
+                <View style={styles.badges}>
+                  {metaItems.map((item) => (
+                    <StatusBadge key={item.label} label={item.label} tone={item.tone} />
+                  ))}
+                </View>
+              </Card>
+            </TouchableOpacity>
+          );
+        })
+      )}
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 24,
-  },
   recipeCard: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   cardHeader: {
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   badges: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
   },
 });

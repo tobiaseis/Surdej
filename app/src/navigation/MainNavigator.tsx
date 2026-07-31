@@ -1,10 +1,18 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { PlatformPressable } from '@react-navigation/elements';
 import { Home, BookOpen, Book, HelpCircle } from 'lucide-react-native';
-import { colors } from '../theme/colors';
+import { colors } from '../theme';
+import { useSettingsHydrated, useSettingsStore } from '../store/settingsStore';
+import type {
+  HomeStackParamList,
+  MainTabParamList,
+  RecipeStackParamList,
+  RootStackParamList,
+} from './types';
 
 // Screens
 import { HomeScreen } from '../screens/HomeScreen';
@@ -21,10 +29,10 @@ import { SosScreen } from '../screens/SosScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 
-const Tab = createBottomTabNavigator();
-const RecipeStack = createNativeStackNavigator();
-const HomeStack = createNativeStackNavigator();
-const RootStack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+const RecipeStack = createNativeStackNavigator<RecipeStackParamList>();
+const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 const HomeStackNavigator = () => {
   return (
@@ -57,15 +65,11 @@ const MainTabs = () => {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSub,
         tabBarStyle: {
-          backgroundColor: '#FFF',
+          backgroundColor: colors.card,
           borderTopColor: colors.border,
         },
         tabBarButton: (props) => (
-          <PlatformPressable
-            {...props}
-            pressColor="rgba(139, 94, 52, 0.08)"
-            pressOpacity={0.92}
-          />
+          <PlatformPressable {...props} pressColor={colors.pressHighlight} pressOpacity={0.92} />
         ),
       }}
     >
@@ -102,9 +106,21 @@ const MainTabs = () => {
 };
 
 export const MainNavigator = () => {
+  const hydrated = useSettingsHydrated();
+  const hasOnboarded = useSettingsStore((state) => state.hasOnboarded);
+
+  // Vent på de gemte indstillinger, så navigatoren mountes med den rigtige
+  // startskærm. `initialRouteName` læses kun ved første mount.
+  if (!hydrated) {
+    return <View style={styles.boot} />;
+  }
+
   return (
     <NavigationContainer>
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName={hasOnboarded ? 'MainTabs' : 'Splash'}
+      >
         <RootStack.Screen name="Splash" component={SplashScreen} />
         <RootStack.Screen name="Onboarding" component={OnboardingScreen} />
         <RootStack.Screen name="MainTabs" component={MainTabs} />
@@ -112,3 +128,10 @@ export const MainNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  boot: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+});

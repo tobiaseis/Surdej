@@ -1,5 +1,6 @@
 import { decode } from 'base64-arraybuffer';
 import { supabase } from '../utils/supabase';
+import { formatIsoDate, formatLongDate } from '../utils/dateTime';
 
 const DIARY_IMAGE_BUCKET = 'diary_images';
 
@@ -34,7 +35,16 @@ const mapDbEntry = (row: any): DiaryEntry => ({
   imageUrl: row.image_url ?? null,
 });
 
-export const fetchDiaryEntries = async (): Promise<DiaryEntry[]> => {
+/**
+ * En tom dagbog og en mislykket hentning ser ens ud på skærmen, hvis vi kun
+ * returnerer en liste. `failed` gør det muligt at vise den rigtige besked.
+ */
+export type DiaryLoadResult = {
+  entries: DiaryEntry[];
+  failed: boolean;
+};
+
+export const fetchDiaryEntries = async (): Promise<DiaryLoadResult> => {
   try {
     const { data, error } = await supabase
       .from('diary_entries')
@@ -43,13 +53,13 @@ export const fetchDiaryEntries = async (): Promise<DiaryEntry[]> => {
 
     if (error || !data) {
       console.log('Kunne ikke hente dagbog fra Supabase.', error?.message);
-      return [];
+      return { entries: [], failed: true };
     }
 
-    return data.map(mapDbEntry);
+    return { entries: data.map(mapDbEntry), failed: false };
   } catch (err) {
     console.error('Netværks- eller Supabase-fejl ved hentning af dagbog.', err);
-    return [];
+    return { entries: [], failed: true };
   }
 };
 
@@ -91,13 +101,7 @@ export const buildDiaryExport = (entries: DiaryEntry[]): string => {
   if (entries.length === 0) return 'Min surdejs-dagbog\n\n(Ingen bagninger gemt endnu.)';
 
   const lines = entries.map((entry) => {
-    const date = (() => {
-      try {
-        return new Date(entry.createdAt).toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' });
-      } catch {
-        return entry.createdAt;
-      }
-    })();
+    const date = formatIsoDate(entry.createdAt, formatLongDate);
 
     const ratings: string[] = [];
     if (entry.crumbRating) ratings.push(`Krumme ${entry.crumbRating}/5`);

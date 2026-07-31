@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { Button } from '../components/Button';
+import { colors, radius, spacing, typography } from '../theme';
+import { Button, Screen } from '../components';
+import { useSettingsStore } from '../store/settingsStore';
+import type { RootStackScreenProps } from '../navigation/types';
 
 const steps = [
   {
@@ -21,66 +20,60 @@ const steps = [
   }
 ];
 
-export const OnboardingScreen = () => {
-  const navigation = useNavigation<any>();
+export const OnboardingScreen = ({ navigation }: RootStackScreenProps<'Onboarding'>) => {
+  const completeOnboarding = useSettingsStore((state) => state.completeOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Husk at onboarding er set, så den ikke vises igen ved næste app-start.
+  const finishOnboarding = () => {
+    completeOnboarding();
+    navigation.replace('MainTabs');
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      // Afslut onboarding
-      navigation.replace('MainTabs');
+      finishOnboarding();
     }
   };
 
   const step = steps[currentStep];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={[typography.h1, { textAlign: 'center', marginBottom: 16 }]}>{step.title}</Text>
-          <Text style={[typography.body, { textAlign: 'center' }]}>{step.text}</Text>
+    <Screen scroll={false} contentStyle={styles.container}>
+      <View style={styles.content}>
+        <Text style={[typography.h1, { textAlign: 'center', marginBottom: spacing.lg }]}>{step.title}</Text>
+        <Text style={[typography.body, { textAlign: 'center' }]}>{step.text}</Text>
+      </View>
+
+      <View style={styles.footer}>
+        <View style={styles.dots}>
+          {steps.map((_, index) => (
+            <View key={index} style={[styles.dot, currentStep === index && styles.dotActive]} />
+          ))}
         </View>
 
-        <View style={styles.footer}>
-          <View style={styles.dots}>
-            {steps.map((_, index) => (
-              <View 
-                key={index} 
-                style={[styles.dot, currentStep === index && styles.dotActive]} 
-              />
-            ))}
-          </View>
-          
-          <Button 
-            title={currentStep === steps.length - 1 ? 'Start min første bagning' : 'Næste'} 
-            onPress={handleNext} 
+        <Button
+          title={currentStep === steps.length - 1 ? 'Start min første bagning' : 'Næste'}
+          onPress={handleNext}
+        />
+
+        {currentStep < steps.length - 1 && (
+          <Button
+            title="Spring over"
+            variant="outline"
+            style={{ marginTop: spacing.lg, borderWidth: 0 }}
+            onPress={finishOnboarding}
           />
-          
-          {currentStep < steps.length - 1 && (
-            <Button 
-              title="Spring over" 
-              variant="outline" 
-              style={{ marginTop: 16, borderWidth: 0 }} 
-              onPress={() => navigation.replace('MainTabs')} 
-            />
-          )}
-        </View>
+        )}
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   container: {
-    flex: 1,
-    padding: 24,
     justifyContent: 'space-between',
   },
   content: {
@@ -89,22 +82,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footer: {
-    paddingBottom: 24,
+    paddingBottom: spacing.xl,
   },
   dots: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 32,
+    marginBottom: spacing.xxl,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: spacing.sm,
+    height: spacing.sm,
+    borderRadius: radius.sm / 2,
     backgroundColor: colors.border,
-    marginHorizontal: 4,
+    marginHorizontal: spacing.xs,
   },
   dotActive: {
     backgroundColor: colors.primary,
-    width: 24,
-  }
+    width: spacing.xl,
+  },
 });

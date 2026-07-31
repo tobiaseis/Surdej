@@ -1,40 +1,49 @@
 import { TextStyle } from 'react-native';
 import { colors } from './colors';
+import { fonts } from './fonts';
+import { spacing } from './spacing';
 
 export const typography = {
   h1: {
+    fontFamily: fonts.display,
     fontSize: 28,
-    fontWeight: '700',
     color: colors.textMain,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   } as TextStyle,
   h2: {
+    fontFamily: fonts.displaySemiBold,
     fontSize: 22,
-    fontWeight: '600',
     color: colors.textMain,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   } as TextStyle,
   h3: {
+    fontFamily: fonts.displaySemiBold,
     fontSize: 18,
-    fontWeight: '600',
     color: colors.textMain,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   } as TextStyle,
   body: {
+    fontFamily: fonts.sans,
     fontSize: 16,
-    fontWeight: '400',
     color: colors.textMain,
     lineHeight: 24,
   } as TextStyle,
   bodySmall: {
+    fontFamily: fonts.sans,
     fontSize: 14,
-    fontWeight: '400',
     color: colors.textSub,
     lineHeight: 20,
   } as TextStyle,
   button: {
+    fontFamily: fonts.sansSemiBold,
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFF',
+    color: colors.onPrimary,
+  } as TextStyle,
+  /** Fremhævet brødtekst – fx feltlabels og sektionsoverskrifter i kort. */
+  label: {
+    fontFamily: fonts.sansSemiBold,
+    fontSize: 14,
+    color: colors.textSub,
+    lineHeight: 20,
   } as TextStyle,
 };

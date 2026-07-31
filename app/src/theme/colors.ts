@@ -8,4 +8,16 @@ export const colors = {
   warning: '#C46A3A',
   card: '#FFFFFF',
   border: '#EADCCB',
-};
+
+  /** Tekst og ikoner oven på primary/secondary/success-flader. */
+  onPrimary: '#FFFFFF',
+  /** Dæmpet grøn baggrund til kvitteringer, fx "Godt klaret". */
+  successSurface: '#EAF2EC',
+  /** Mørkt underlag bag video, så letterboxing ikke lyser. */
+  videoBackground: '#000000',
+  shadow: '#000000',
+  /** Halvgennemsigtigt lag bag modaler. */
+  overlay: 'rgba(0, 0, 0, 0.4)',
+  /** Ripple/press-farve afledt af primary. */
+  pressHighlight: 'rgba(139, 94, 52, 0.08)',
+} as const;

@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
+import { colors, fonts, radius, spacing, typography } from '../theme';
+import { Button, Card, Screen } from '../components';
 import { useBakeStore } from '../store/bakeStore';
 import { saveDiaryEntry, uploadDiaryImage } from '../data/diary';
+import type { HomeStackScreenProps } from '../navigation/types';
 
 type RatingRowProps = {
   label: string;
@@ -18,7 +15,7 @@ type RatingRowProps = {
 
 const RatingRow = ({ label, value, onChange }: RatingRowProps) => (
   <View style={styles.ratingRow}>
-    <Text style={[typography.bodySmall, { fontWeight: '600', marginBottom: 8 }]}>{label}</Text>
+    <Text style={[typography.bodySmall, styles.fieldLabel]}>{label}</Text>
     <View style={styles.ratingButtons}>
       {[1, 2, 3, 4, 5].map((n) => {
         const isActive = n <= value;
@@ -28,6 +25,9 @@ const RatingRow = ({ label, value, onChange }: RatingRowProps) => (
             style={[styles.ratingButton, isActive && styles.ratingButtonActive]}
             onPress={() => onChange(n)}
             activeOpacity={0.94}
+            accessibilityRole="button"
+            accessibilityLabel={`${label}: ${n} af 5`}
+            accessibilityState={{ selected: isActive }}
           >
             <Text style={[styles.ratingText, isActive && styles.ratingTextActive]}>{n}</Text>
           </TouchableOpacity>
@@ -37,8 +37,7 @@ const RatingRow = ({ label, value, onChange }: RatingRowProps) => (
   </View>
 );
 
-export const CompletionScreen = () => {
-  const navigation = useNavigation<any>();
+export const CompletionScreen = ({ navigation }: HomeStackScreenProps<'Færdig'>) => {
   const { activeBake, cancelBake } = useBakeStore();
 
   const recipeName = activeBake?.recipe.name ?? 'Din bagning';
@@ -95,16 +94,11 @@ export const CompletionScreen = () => {
     applyResult(result);
   };
 
-  const handleSave = async () => {
+  // Gemmer indlægget og bliver på skærmen, hvis det fejler, så brugeren
+  // ikke mister sine noter og kan prøve igen.
+  const persistEntry = async (imageUrl?: string) => {
     setSaving(true);
-
-    let imageUrl: string | undefined;
-    if (imageBase64) {
-      const uploaded = await uploadDiaryImage(imageBase64);
-      imageUrl = uploaded ?? undefined;
-    }
-
-    await saveDiaryEntry({
+    const saved = await saveDiaryEntry({
       recipeName,
       temp: temp || undefined,
       crumbRating: crumb || undefined,
@@ -113,85 +107,108 @@ export const CompletionScreen = () => {
       imageUrl,
     });
     setSaving(false);
+
+    if (!saved) {
+      Alert.alert(
+        'Kunne ikke gemme',
+        'Dit indlæg blev ikke gemt. Tjek din internetforbindelse, og prøv igen.'
+      );
+      return;
+    }
+
     finish('Dagbog');
   };
 
+  const handleSave = async () => {
+    if (!imageBase64) {
+      await persistEntry();
+      return;
+    }
+
+    setSaving(true);
+    const uploaded = await uploadDiaryImage(imageBase64);
+    setSaving(false);
+
+    if (uploaded) {
+      await persistEntry(uploaded);
+      return;
+    }
+
+    Alert.alert(
+      'Billedet kunne ikke uploades',
+      'Vil du gemme resten af indlægget uden billede?',
+      [
+        { text: 'Fortryd', style: 'cancel' },
+        { text: 'Gem uden billede', onPress: () => { void persistEntry(); } },
+      ]
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={typography.h1}>{recipeName} er færdig 🎉</Text>
-        <Text style={[typography.body, { marginBottom: 24 }]}>
-          Godt klaret! Gem resultatet, så du kan sammenligne næste gang.
-        </Text>
+    <Screen>
+      <Text style={typography.h1}>{recipeName} er færdig 🎉</Text>
+      <Text style={[typography.body, { marginBottom: spacing.xl }]}>
+        Godt klaret! Gem resultatet, så du kan sammenligne næste gang.
+      </Text>
 
-        <Card>
-          <Text style={[typography.h3, { marginBottom: 12 }]}>Billede</Text>
-          {imageUri ? (
-            <Image source={{ uri: imageUri }} style={styles.preview} resizeMode="cover" />
-          ) : (
-            <View style={[styles.preview, styles.previewPlaceholder]}>
-              <Text style={[typography.bodySmall, { color: colors.textSub }]}>Tilføj et foto af dit bagværk</Text>
-            </View>
-          )}
-          <View style={styles.imageButtons}>
-            <Button title="Vælg billede" variant="outline" style={styles.imageButton} onPress={pickFromLibrary} />
-            <Button title="Tag billede" variant="outline" style={styles.imageButton} onPress={takePhoto} />
+      <Card>
+        <Text style={[typography.h3, { marginBottom: spacing.md }]}>Billede</Text>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.preview} resizeMode="cover" />
+        ) : (
+          <View style={[styles.preview, styles.previewPlaceholder]}>
+            <Text style={[typography.bodySmall, { color: colors.textSub }]}>Tilføj et foto af dit bagværk</Text>
           </View>
-        </Card>
+        )}
+        <View style={styles.imageButtons}>
+          <Button title="Vælg billede" variant="outline" style={styles.imageButton} onPress={pickFromLibrary} />
+          <Button title="Tag billede" variant="outline" style={styles.imageButton} onPress={takePhoto} />
+        </View>
+      </Card>
 
-        <Card>
-          <Text style={[typography.h3, { marginBottom: 16 }]}>Hvordan blev resultatet?</Text>
+      <Card>
+        <Text style={[typography.h3, { marginBottom: spacing.lg }]}>Hvordan blev resultatet?</Text>
 
-          <RatingRow label="Krumme" value={crumb} onChange={setCrumb} />
-          <RatingRow label="Smag" value={taste} onChange={setTaste} />
+        <RatingRow label="Krumme" value={crumb} onChange={setCrumb} />
+        <RatingRow label="Smag" value={taste} onChange={setTaste} />
 
-          <Text style={[typography.bodySmall, { fontWeight: '600', marginTop: 8, marginBottom: 8 }]}>Rumtemperatur</Text>
-          <TextInput
-            style={styles.input}
-            value={temp}
-            onChangeText={setTemp}
-            placeholder="fx 21°C"
-            placeholderTextColor={colors.textSub}
-          />
-
-          <Text style={[typography.bodySmall, { fontWeight: '600', marginTop: 16, marginBottom: 8 }]}>Noter</Text>
-          <TextInput
-            style={[styles.input, styles.noteInput]}
-            value={note}
-            onChangeText={setNote}
-            placeholder="Dejen var lidt for våd, men bollerne blev luftige..."
-            placeholderTextColor={colors.textSub}
-            multiline
-          />
-        </Card>
-
-        <Button title="Gem i dagbog" loading={saving} onPress={handleSave} />
-        <Button
-          title="Spring over"
-          variant="outline"
-          style={{ marginTop: 12, borderWidth: 0 }}
-          onPress={() => finish('Hjem')}
+        <Text style={[typography.bodySmall, styles.fieldLabel, { marginTop: spacing.sm }]}>Rumtemperatur</Text>
+        <TextInput
+          style={styles.input}
+          value={temp}
+          onChangeText={setTemp}
+          placeholder="fx 21°C"
+          placeholderTextColor={colors.textSub}
         />
-      </ScrollView>
-    </SafeAreaView>
+
+        <Text style={[typography.bodySmall, styles.fieldLabel, { marginTop: spacing.lg }]}>Noter</Text>
+        <TextInput
+          style={[styles.input, styles.noteInput]}
+          value={note}
+          onChangeText={setNote}
+          placeholder="Dejen var lidt for våd, men bollerne blev luftige..."
+          placeholderTextColor={colors.textSub}
+          multiline
+        />
+      </Card>
+
+      <Button title="Gem i dagbog" loading={saving} onPress={handleSave} />
+      <Button
+        title="Spring over"
+        variant="outline"
+        style={{ marginTop: spacing.md, borderWidth: 0 }}
+        onPress={() => finish('Hjem')}
+      />
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    paddingHorizontal: 24,
-    paddingTop: 28,
-    paddingBottom: 24,
-  },
   preview: {
     width: '100%',
     height: 180,
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: radius.lg,
+    marginBottom: spacing.md,
     backgroundColor: colors.border,
   },
   previewPlaceholder: {
@@ -200,22 +217,26 @@ const styles = StyleSheet.create({
   },
   imageButtons: {
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.md,
   },
   imageButton: {
     flex: 1,
   },
+  fieldLabel: {
+    fontFamily: fonts.sansSemiBold,
+    marginBottom: spacing.sm,
+  },
   ratingRow: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   ratingButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
   ratingButton: {
     flex: 1,
     aspectRatio: 1,
-    borderRadius: 10,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
@@ -226,19 +247,20 @@ const styles = StyleSheet.create({
     borderColor: colors.secondary,
   },
   ratingText: {
+    fontFamily: fonts.sansSemiBold,
     fontSize: 16,
-    fontWeight: '600',
     color: colors.textSub,
   },
   ratingTextActive: {
-    color: '#FFF',
+    color: colors.onPrimary,
   },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 10,
+    fontFamily: fonts.sans,
     fontSize: 16,
     color: colors.textMain,
     backgroundColor: colors.background,
