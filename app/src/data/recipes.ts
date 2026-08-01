@@ -20,6 +20,11 @@ export type RecipeStep = {
    * Kun disse trin skaleres når brugeren vælger en anden temperatur/styrke.
    */
   temperatureSensitive?: boolean;
+  /**
+   * Opskriftens eget fodringstrin. Bageplanen skifter det ud med brugerens
+   * egen fodring, så mængder og tid passer til det forhold, hun faktisk brugte.
+   */
+  isStarterFeed?: boolean;
   videoUrl?: string; // Klar til at modtage URL fra Supabase
   technique?: TechniqueGuide; // Valgfri teknik-guide til trinnet
 };
@@ -59,7 +64,7 @@ export const standardRecipes: Recipe[] = [
     ingredients: ['500 g hvedemel', '375 g vand', '100 g aktiv surdej', '10 g salt'],
     tools: ['Skål', 'Dejskraber', 'Bagepapir', 'Ovnplade'],
     steps: [
-      { id: 'step-1', title: 'Fodr surdej', description: 'Gør din surdej klar. Bland 50g surdej, 50g vand, 50g mel.', durationMinutes: 240, temperatureSensitive: true },
+      { id: 'step-1', title: 'Fodr surdej', description: 'Gør din surdej klar. Bland 50g surdej, 50g vand, 50g mel.', durationMinutes: 240, temperatureSensitive: true, isStarterFeed: true },
       { id: 'step-2', title: 'Autolyse', description: 'Bland vand og mel sammen i en skål.', durationMinutes: 60, temperatureSensitive: true },
       { id: 'step-3', title: 'Tilsæt surdej & salt', description: 'Ælt surdejen og saltet ind i dejen.', durationMinutes: 30 },
       { id: 'step-4', title: 'Stræk og fold 1', description: 'Stræk dejen op og fold den over sig selv.', durationMinutes: 30, technique: straekOgFoldTechnique, videoUrl: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4' },
@@ -81,7 +86,7 @@ export const standardRecipes: Recipe[] = [
     ingredients: ['450 g hvedemel', '50 g fuldkornsmel', '375 g vand', '100 g aktiv surdej', '10 g salt'],
     tools: ['Skål', 'Dejskraber', 'Hævekurv', 'Støbejernsgryde med låg'],
     steps: [
-      { id: 'gb-step-1', title: 'Fodr surdej', description: 'Bland 50g surdej, 50g vand, 50g mel og lad den blive aktiv.', durationMinutes: 300, temperatureSensitive: true },
+      { id: 'gb-step-1', title: 'Fodr surdej', description: 'Bland 50g surdej, 50g vand, 50g mel og lad den blive aktiv.', durationMinutes: 300, temperatureSensitive: true, isStarterFeed: true },
       { id: 'gb-step-2', title: 'Autolyse', description: 'Bland vand og mel og lad det hvile.', durationMinutes: 60, temperatureSensitive: true },
       { id: 'gb-step-3', title: 'Tilsæt surdej & salt', description: 'Ælt surdej og salt ind i dejen.', durationMinutes: 30 },
       { id: 'gb-step-4', title: 'Stræk og fold 1', description: 'Stræk dejen op og fold den over sig selv.', durationMinutes: 45, technique: straekOgFoldTechnique },
@@ -104,7 +109,7 @@ export const standardRecipes: Recipe[] = [
     ingredients: ['500 g hvedemel', '400 g vand', '100 g aktiv surdej', '12 g salt', 'Olivenolie', 'Flagesalt'],
     tools: ['Skål', 'Dejskraber', 'Bradepande', 'Bagepapir'],
     steps: [
-      { id: 'fc-step-1', title: 'Fodr surdej', description: 'Gør surdejen aktiv.', durationMinutes: 240, temperatureSensitive: true },
+      { id: 'fc-step-1', title: 'Fodr surdej', description: 'Gør surdejen aktiv.', durationMinutes: 240, temperatureSensitive: true, isStarterFeed: true },
       { id: 'fc-step-2', title: 'Bland dej', description: 'Bland mel, vand, surdej og salt til en våd dej.', durationMinutes: 30 },
       { id: 'fc-step-3', title: 'Stræk og fold 1', description: 'Våde hænder: stræk og fold dejen i skålen.', durationMinutes: 45, technique: straekOgFoldTechnique },
       { id: 'fc-step-4', title: 'Stræk og fold 2', description: 'Endnu et sæt foldninger.', durationMinutes: 45, technique: straekOgFoldTechnique },
@@ -126,6 +131,7 @@ const mapDbRecipe = (r: any, stepsData: any[]): Recipe => {
       description: s.description,
       durationMinutes: s.duration_minutes,
       temperatureSensitive: s.temperature_sensitive ?? false,
+      isStarterFeed: s.is_starter_feed ?? undefined,
       videoUrl: s.video_url ?? undefined,
       technique: s.technique ?? undefined,
     }));

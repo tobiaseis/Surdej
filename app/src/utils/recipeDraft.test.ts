@@ -8,7 +8,6 @@ import {
   validateDraft,
   withTrailingBlank,
 } from './recipeDraft';
-import { parseRecipeDough } from './doughCalculator';
 import type { Recipe } from '../data/recipes';
 
 const filledDraft = () => ({
@@ -72,21 +71,6 @@ describe('draftToRecipeFields', () => {
     assert.equal(fields.steps[0].description, 'Bland mel og vand.');
     assert.equal(fields.steps[0].durationMinutes, 60);
     assert.equal(fields.steps[0].temperatureSensitive, true);
-  });
-
-  it('writes ingredients the dough calculator can read back', () => {
-    const fields = draftToRecipeFields({
-      ...filledDraft(),
-      ingredients: ['400 g hvedemel', '100 g fuldkornsmel', '375 g vand', '100 g surdej', '10 g salt'],
-    });
-
-    const dough = parseRecipeDough({ ...fields, id: 'x', steps: [] } as unknown as Recipe);
-
-    assert.ok(dough);
-    assert.equal(dough.flourGrams, 500);
-    assert.equal(dough.ratios.hydrationPct, 75);
-    // Flere meltyper skal komme med hver for sig, så mængderne kan skaleres.
-    assert.equal(dough.ratios.flourMix?.length, 2);
   });
 });
 

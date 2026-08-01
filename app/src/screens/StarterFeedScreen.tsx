@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, fonts, spacing, typography } from '../theme';
 import {
   BackButton,
@@ -10,6 +9,7 @@ import {
   Screen,
   Segmented,
   SegmentedOption,
+  StepHeader,
   Stepper,
 } from '../components';
 import {
@@ -19,20 +19,15 @@ import {
   FeedRatio,
   calculateFeed,
   formatHourRange,
-  getFeedTime,
+  formatRatio,
   getPeakTimes,
   getPeakWindow,
 } from '../utils/starterFeed';
+import { createFeedPlan } from '../utils/bakePlan';
 import type { StarterStrength } from '../utils/scheduleCalculator';
-import {
-  formatShortDate,
-  formatTime,
-  formatWeekdayTime,
-  mergeDatePart,
-  mergeTimePart,
-} from '../utils/dateTime';
+import { formatTime } from '../utils/dateTime';
 import { useSettingsStore } from '../store/settingsStore';
-import type { HomeStackScreenProps } from '../navigation/types';
+import type { BakeFlow, HomeStackScreenProps } from '../navigation/types';
 
 /** Om brugeren regner frem fra sin surdej eller baglæns fra opskriften. */
 type AmountMode = 'starter' | 'total';
@@ -42,12 +37,16 @@ const AMOUNT_MODES: SegmentedOption<AmountMode>[] = [
   { label: 'Jeg skal bruge', value: 'total' },
 ];
 
-/** Om surdejen skal være klar hurtigst muligt eller til et bestemt tidspunkt. */
-type TimingMode = 'now' | 'target';
+/**
+ * Hvad bageplanen hænges op på. Fodrer hun nu, regnes planen forlæns herfra.
+ * Fodrer hun senere, vælger hun sluttidspunktet i sidste trin, og planen
+ * regnes baglæns – så fortæller den, hvornår der skal fodres.
+ */
+type TimingMode = 'now' | 'later';
 
 const TIMING_MODES: SegmentedOption<TimingMode>[] = [
   { label: 'Jeg fodrer nu', value: 'now' },
-  { label: 'Klar til et tidspunkt', value: 'target' },
+  { label: 'Jeg fodrer senere', value: 'later' },
 ];
 
 const TEMP_OPTIONS: SegmentedOption<number>[] = [
@@ -67,16 +66,16 @@ const PRESET_OPTIONS: SegmentedOption<string>[] = FEED_PRESETS.map((preset) => (
   value: preset.label,
 }));
 
-const ratioLabel = (ratio: FeedRatio) => `${ratio.starter}:${ratio.flour}:${ratio.water}`;
+/**
+ * Bageflowets første trin. Fodringen er ikke et opslagsværktøj ved siden af
+ * planen – det er trinnet, resten af planen bygger videre på, og forholdet
+ * her bestemmer både mængderne og hvor længe surdejen er om at toppe.
+ */
+export const StarterFeedScreen = ({ navigation, route }: HomeStackScreenProps<'Fodring'>) => {
+  // Kommer man fra en opskrift i biblioteket, er valget allerede truffet, og
+  // flowets trin 2 og 3 springes over.
+  const preselectedRecipe = route.params?.recipe;
 
-const getDefaultReadyTime = () => {
-  const target = new Date();
-  target.setDate(target.getDate() + 1);
-  target.setHours(7, 0, 0, 0);
-  return target;
-};
-
-export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
   const defaultRoomTempC = useSettingsStore((state) => state.defaultRoomTempC);
   const defaultStarterStrength = useSettingsStore((state) => state.defaultStarterStrength);
 
@@ -87,7 +86,6 @@ export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
   const [reserveGrams, setReserveGrams] = useState(30);
 
   const [timing, setTiming] = useState<TimingMode>('now');
-  const [readyAt, setReadyAt] = useState(getDefaultReadyTime);
   const [roomTempC, setRoomTempC] = useState(defaultRoomTempC);
   const [starterStrength, setStarterStrength] = useState<StarterStrength>(defaultStarterStrength);
 
@@ -101,49 +99,52 @@ export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
 
   const options = useMemo(() => ({ roomTempC, starterStrength }), [roomTempC, starterStrength]);
 
-  const result = calculateFeed(
-    ratio,
-    mode === 'starter'
-      ? { mode: 'starter', starterGrams }
-      : { mode: 'total', totalGrams, reserveGrams }
+  const basis = useMemo(
+    () =>
+      mode === 'starter'
+        ? ({ mode: 'starter', starterGrams } as const)
+        : ({ mode: 'total', totalGrams, reserveGrams } as const),
+    [mode, starterGrams, totalGrams, reserveGrams]
   );
 
+  const result = calculateFeed(ratio, basis);
   const peak = getPeakWindow(ratio, options);
   const peakTimes = getPeakTimes(peak, now);
-  const feedAt = getFeedTime(ratio, readyAt, options);
-  const feedTimeHasPassed = feedAt.getTime() < now.getTime();
 
   const setPart = (key: keyof FeedRatio, value: number) =>
     setRatio((current) => ({ ...current, [key]: value }));
 
-  const activePreset = FEED_PRESETS.find(
-    (preset) => ratioLabel(preset.ratio) === ratioLabel(ratio)
-  );
+  const activePreset = FEED_PRESETS.find((preset) => formatRatio(preset.ratio) === formatRatio(ratio));
 
-  const openAndroidPicker = (pickerMode: 'date' | 'time') => {
-    DateTimePickerAndroid.open({
-      value: readyAt,
-      mode: pickerMode,
-      is24Hour: true,
-      onChange: (event, selectedDate) => {
-        if (event.type !== 'set' || !selectedDate) return;
-        setReadyAt((current) =>
-          pickerMode === 'date'
-            ? mergeDatePart(current, selectedDate)
-            : mergeTimePart(current, selectedDate)
-        );
-      },
-    });
+  const goToNextStep = () => {
+    const flow: BakeFlow = {
+      feed: createFeedPlan(ratio, basis, options),
+      roomTempC,
+      starterStrength,
+      // Fodrer hun nu, låses tidspunktet først når planen startes – indtil da
+      // er "nu" et bevægeligt mål. Her markeres kun, at planen skal regnes
+      // forlæns fra fodringen.
+      fedAt: timing === 'now' ? new Date().toISOString() : undefined,
+    };
+
+    if (preselectedRecipe) {
+      navigation.navigate('GaaIGang', { recipe: preselectedRecipe, flow });
+      return;
+    }
+
+    navigation.navigate('VaelgOpskrift', { flow });
   };
 
   return (
     <>
       <Screen withBottomBar="tall">
         <BackButton />
+        <StepHeader step={1} />
+
         <Text style={typography.h1}>Fodr surdejen</Text>
-        <Text style={[typography.body, { marginBottom: spacing.xl }]}>
-          Vælg forholdet, så får du at vide hvor meget mel og vand der skal i – og hvornår surdejen er
-          på toppen.
+        <Text style={[typography.body, styles.intro]}>
+          Vælg forholdet, så får du at vide hvor meget mel og vand der skal i. Resten af bageplanen
+          lægges i forlængelse af fodringen.
         </Text>
 
         <Card style={styles.card}>
@@ -162,7 +163,7 @@ export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
           />
 
           <Text style={[typography.bodySmall, styles.presetCaption]}>
-            {activePreset ? activePreset.caption : `Dit eget forhold ${ratioLabel(ratio)}`}
+            {activePreset ? activePreset.caption : `Dit eget forhold ${formatRatio(ratio)}`}
           </Text>
 
           <View style={styles.stepperSpacing}>
@@ -249,66 +250,36 @@ export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
         </Card>
 
         <Card style={styles.card}>
-          <Text style={[typography.h3, { marginBottom: spacing.md }]}>Hvornår er den klar?</Text>
-          <Segmented options={TIMING_MODES} selected={timing} onSelect={setTiming} />
-
-          {timing === 'now' ? (
-            <View style={styles.timingBlock}>
-              <Text style={typography.h2}>{formatHourRange(peak)}</Text>
-              <Text style={typography.body}>
-                Fodrer du nu, topper surdejen mellem kl. {formatTime(peakTimes.from)} og{' '}
-                {formatTime(peakTimes.to)}.
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.timingBlock}>
-              {Platform.OS === 'android' && (
-                <>
-                  <Button
-                    title={`Dato: ${formatShortDate(readyAt)}`}
-                    variant="outline"
-                    onPress={() => openAndroidPicker('date')}
-                  />
-                  <Button
-                    title={`Klar kl.: ${formatTime(readyAt)}`}
-                    variant="outline"
-                    style={{ marginTop: spacing.md }}
-                    onPress={() => openAndroidPicker('time')}
-                  />
-                </>
-              )}
-
-              {Platform.OS === 'ios' && (
-                <DateTimePicker
-                  value={readyAt}
-                  mode="datetime"
-                  is24Hour
-                  display="spinner"
-                  onChange={(_event, selectedDate) => selectedDate && setReadyAt(selectedDate)}
-                  textColor={colors.textMain}
-                />
-              )}
-
-              <Text style={[typography.h2, { marginTop: spacing.lg }]}>
-                Fodr {formatWeekdayTime(feedAt)}
-              </Text>
-              <Text style={typography.body}>
-                Så er den på toppen, når du skal bruge den ({formatHourRange(peak)} efter fodring).
-              </Text>
-              {feedTimeHasPassed && (
-                <Text style={[typography.bodySmall, { color: colors.warning, marginTop: spacing.sm }]}>
-                  Det tidspunkt er passeret. Vælg et senere tidspunkt, eller brug et forhold med mere
-                  surdej i.
-                </Text>
-              )}
-            </View>
-          )}
+          <Text style={typography.h3}>I køkkenet</Text>
+          <Text style={typography.bodySmall}>
+            Gælder både surdejen og hævetrinnene i bageplanen.
+          </Text>
 
           <Text style={[typography.label, styles.subLabel]}>Rumtemperatur</Text>
           <Segmented options={TEMP_OPTIONS} selected={roomTempC} onSelect={setRoomTempC} />
 
           <Text style={[typography.label, styles.subLabel]}>Surdejens styrke</Text>
           <Segmented options={STARTER_OPTIONS} selected={starterStrength} onSelect={setStarterStrength} />
+        </Card>
+
+        <Card style={styles.card}>
+          <Text style={[typography.h3, { marginBottom: spacing.md }]}>Hvornår fodrer du?</Text>
+          <Segmented options={TIMING_MODES} selected={timing} onSelect={setTiming} />
+
+          <View style={styles.timingBlock}>
+            <Text style={typography.h2}>{formatHourRange(peak)}</Text>
+            {timing === 'now' ? (
+              <Text style={typography.body}>
+                Fodrer du nu, topper surdejen mellem kl. {formatTime(peakTimes.from)} og{' '}
+                {formatTime(peakTimes.to)}. Resten af planen regnes derfra.
+              </Text>
+            ) : (
+              <Text style={typography.body}>
+                Så længe er surdejen om at toppe. Vælg opskrift og sluttidspunkt i de næste trin, så
+                siger vi, hvornår du skal fodre.
+              </Text>
+            )}
+          </View>
 
           <Text style={[typography.bodySmall, styles.footnote]}>
             Tiderne er et skøn. Stol på surdejen: den er klar, når den er hævet til det dobbelte og
@@ -330,12 +301,20 @@ export const StarterFeedScreen = (_props: HomeStackScreenProps<'Fodring'>) => {
             </View>
           ))}
         </View>
+        <Button
+          title={preselectedRecipe ? 'Videre til bageplanen' : 'Videre – vælg opskrift'}
+          style={{ marginTop: spacing.md }}
+          onPress={goToNextStep}
+        />
       </BottomBar>
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  intro: {
+    marginBottom: spacing.xl,
+  },
   card: {
     marginBottom: spacing.lg,
   },

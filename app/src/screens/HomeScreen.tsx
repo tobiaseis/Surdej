@@ -87,7 +87,7 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
               title="Start ny bagning"
               onPress={() => {
                 cancelBake();
-                navigation.navigate('Opskrifter');
+                navigation.navigate('Fodring');
               }}
             />
           </Card>
@@ -105,12 +105,6 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
           <Text style={typography.h3}>Start kl. {formatTime(nextStep.scheduledAt)}</Text>
           <View style={{ height: spacing.lg }} />
           <Button title="Gå til tidslinje" onPress={() => navigation.navigate('AktivBagning')} />
-          <Button
-            title="Fodr surdejen"
-            variant="outline"
-            style={{ marginTop: spacing.md }}
-            onPress={() => navigation.navigate('Fodring')}
-          />
         </Card>
       </Screen>
     );
@@ -124,23 +118,11 @@ export const HomeScreen = ({ navigation }: HomeScreenProps) => {
       <Text style={[typography.body, { marginBottom: spacing.xl }]}>Klar til at bage?</Text>
 
       <Card>
-        <Text style={typography.h2}>Planlæg en bagning</Text>
-        <Text style={[typography.body, { marginBottom: spacing.lg }]}>Vælg hvad du vil bage, og hvornår det skal være klar.</Text>
-        <Button title="Start ny bageplan" onPress={() => navigation.navigate('Opskrifter')} />
-        <Button
-          title="Beregn mel, vand og surdej"
-          variant="outline"
-          style={{ marginTop: spacing.md }}
-          onPress={() => navigation.navigate('Opskrifter', { screen: 'Beregner' })}
-        />
-      </Card>
-
-      <Card style={{ marginTop: spacing.lg }}>
-        <Text style={typography.h2}>Fodr surdejen</Text>
+        <Text style={typography.h2}>Start en bagning</Text>
         <Text style={[typography.body, { marginBottom: spacing.lg }]}>
-          Få forholdet mellem surdej, mel og vand – og hvornår den er på toppen.
+          Vi begynder med at fodre surdejen – så vælger du opskrift, og planen lægger sig selv.
         </Text>
-        <Button title="Åbn fodring" variant="outline" onPress={() => navigation.navigate('Fodring')} />
+        <Button title="Fodr surdejen" onPress={() => navigation.navigate('Fodring')} />
       </Card>
 
       {(loadingSuggestions || suggestions.length > 0) && (

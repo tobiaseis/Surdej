@@ -26,9 +26,9 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { RecipeListScreen } from '../screens/RecipeListScreen';
 import { RecipeDetailScreen } from '../screens/RecipeDetailScreen';
 import { RecipeFormScreen } from '../screens/RecipeFormScreen';
-import { SetupScreen } from '../screens/SetupScreen';
-import { DoughCalculatorScreen } from '../screens/DoughCalculatorScreen';
-import { PlanOverviewScreen } from '../screens/PlanOverviewScreen';
+import { PickRecipeScreen } from '../screens/PickRecipeScreen';
+import { PlanRecipeScreen } from '../screens/PlanRecipeScreen';
+import { GoBakeScreen } from '../screens/GoBakeScreen';
 import { DiaryScreen } from '../screens/DiaryScreen';
 import { DiaryEntryScreen } from '../screens/DiaryEntryScreen';
 import { CoffeeScreen } from '../screens/CoffeeScreen';
@@ -48,10 +48,16 @@ const HomeStackNavigator = () => {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
+
+      {/* Bageflowet: fodr surdej → vis opskrifter → vælg opskrift → gå i gang. */}
+      <HomeStack.Screen name="Fodring" component={StarterFeedScreen} />
+      <HomeStack.Screen name="VaelgOpskrift" component={PickRecipeScreen} />
+      <HomeStack.Screen name="OpskriftIPlan" component={PlanRecipeScreen} />
+      <HomeStack.Screen name="GaaIGang" component={GoBakeScreen} />
+
       <HomeStack.Screen name="AktivBagning" component={ActiveBakeScreen} />
       <HomeStack.Screen name="Teknik" component={TechniqueGuideScreen} />
       <HomeStack.Screen name="Færdig" component={CompletionScreen} />
-      <HomeStack.Screen name="Fodring" component={StarterFeedScreen} />
       <HomeStack.Screen name="Indstillinger" component={SettingsScreen} />
     </HomeStack.Navigator>
   );
@@ -63,9 +69,6 @@ const RecipeStackNavigator = () => {
       <RecipeStack.Screen name="OpskriftListe" component={RecipeListScreen} />
       <RecipeStack.Screen name="OpskriftDetaljer" component={RecipeDetailScreen} />
       <RecipeStack.Screen name="OpskriftFormular" component={RecipeFormScreen} />
-      <RecipeStack.Screen name="SetupOpskrift" component={SetupScreen} />
-      <RecipeStack.Screen name="Beregner" component={DoughCalculatorScreen} />
-      <RecipeStack.Screen name="PlanOversigt" component={PlanOverviewScreen} />
     </RecipeStack.Navigator>
   );
 };

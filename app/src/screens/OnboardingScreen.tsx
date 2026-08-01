@@ -7,12 +7,12 @@ import type { RootStackScreenProps } from '../navigation/types';
 
 const steps = [
   {
-    title: 'Start med slutningen',
-    text: 'Vælg hvornår dit brød eller dine boller skal være klar. Så regner vi resten ud.'
+    title: 'Det starter med surdejen',
+    text: 'Fodr surdejen, vælg en opskrift – så lægger vi resten af planen for dig.'
   },
   {
-    title: 'Vi holder styr på tiden',
-    text: 'Du får en enkel tidsplan med timere og næste handling.'
+    title: 'Du bestemmer tidspunktet',
+    text: 'Fodrer du nu, siger vi hvornår det er færdigt. Skal det være klar til et bestemt tidspunkt, siger vi hvornår du skal fodre.'
   },
   {
     title: 'Forsinket? Planen følger med',

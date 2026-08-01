@@ -3,6 +3,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { Recipe, RecipeStep } from '../data/recipes';
 import type { DiaryEntry } from '../data/diary';
+import type { FeedPlan } from '../utils/bakePlan';
 import type { StarterStrength } from '../utils/scheduleCalculator';
 
 /**
@@ -11,30 +12,48 @@ import type { StarterStrength } from '../utils/scheduleCalculator';
  * parameter bliver en compilerfejl i stedet for en fejl på telefonen.
  */
 
+/**
+ * Det bageflowets første trin fandt ud af, båret med gennem de næste trin.
+ * Bageplanen kan ikke lægges uden en fodring, så den følger med hele vejen.
+ */
+export type BakeFlow = {
+  feed: FeedPlan;
+  roomTempC: number;
+  starterStrength: StarterStrength;
+  /**
+   * ISO-streng, fordi Date ikke kan serialiseres i navigation-params.
+   * Sat når brugeren fodrer nu – så regnes planen forlæns herfra. Er den
+   * ikke sat, vælger brugeren sluttidspunktet, og planen regnes baglæns.
+   */
+  fedAt?: string;
+};
+
+/**
+ * Bageflowet: fodr surdej → vis opskrifter → vælg opskrift → gå i gang.
+ * Det ligger i Hjem-stakken, fordi det ender i den aktive bagning.
+ */
 export type HomeStackParamList = {
   HomeMain: undefined;
+  /** Trin 1. Kommer man med en opskrift i hånden, springes trin 2 og 3 over. */
+  Fodring: { recipe?: Recipe } | undefined;
+  /** Trin 2 */
+  VaelgOpskrift: { flow: BakeFlow };
+  /** Trin 3 */
+  OpskriftIPlan: { recipe: Recipe; flow: BakeFlow };
+  /** Trin 4 */
+  GaaIGang: { recipe: Recipe; flow: BakeFlow };
   AktivBagning: undefined;
   Teknik: { step: RecipeStep };
   Færdig: undefined;
-  Fodring: undefined;
   Indstillinger: undefined;
 };
 
+/** Opskrifts-fanen er et bibliotek: læs, skriv og ret opskrifter. */
 export type RecipeStackParamList = {
   OpskriftListe: undefined;
   OpskriftDetaljer: { recipe: Recipe };
-  SetupOpskrift: { recipe: Recipe };
-  /** Uden opskrift starter beregneren på standardforholdene. */
-  Beregner: { recipe?: Recipe } | undefined;
   /** Uden opskrift oprettes en ny; med opskrift redigeres den. */
   OpskriftFormular: { recipe?: Recipe } | undefined;
-  PlanOversigt: {
-    recipe: Recipe;
-    /** ISO-streng, fordi Date ikke kan serialiseres i navigation-params. */
-    targetTime: string;
-    roomTempC: number;
-    starterStrength: StarterStrength;
-  };
 };
 
 export type DiaryStackParamList = {

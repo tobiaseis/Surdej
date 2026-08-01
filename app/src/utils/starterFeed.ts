@@ -33,6 +33,9 @@ export const FEED_PRESETS: FeedPreset[] = [
 
 export const DEFAULT_FEED_RATIO: FeedRatio = FEED_PRESETS[1].ratio;
 
+/** "1:2:2" – forholdet skrevet som det står på skærmen og i opskrifterne. */
+export const formatRatio = (ratio: FeedRatio) => `${ratio.starter}:${ratio.flour}:${ratio.water}`;
+
 /** Grænser for indtastning, så et forhold ikke kan blive umuligt. */
 export const FEED_LIMITS = {
   part: { min: 1, max: 10 },
@@ -159,16 +162,6 @@ export const getPeakTimes = (window: PeakWindow, fedAt = new Date()) => ({
   from: new Date(fedAt.getTime() + window.fromHours * 60 * 60 * 1000),
   to: new Date(fedAt.getTime() + window.toHours * 60 * 60 * 1000),
 });
-
-/**
- * Hvornår fodringen skal ske, hvis surdejen skal være klar til et bestemt
- * tidspunkt – fx når bageplanen siger, dejen skal røres kl. 21.
- */
-export const getFeedTime = (
-  ratio: FeedRatio,
-  readyAt: Date,
-  options: ScheduleOptions = DEFAULT_SCHEDULE_OPTIONS
-): Date => new Date(readyAt.getTime() - getPeakWindow(ratio, options).hours * 60 * 60 * 1000);
 
 /** "ca. 5–7 timer" – halve timer, fordi tallet alligevel er et skøn. */
 export const formatHourRange = (window: PeakWindow): string => {

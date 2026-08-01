@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert } from 'react-native';
-import { colors, radius, spacing, typography } from '../theme';
-import { BackButton, BottomBar, Button, Card, Screen } from '../components';
-import { getRecipeTotalHours } from '../utils/recipeMeta';
+import React, { useMemo, useState } from 'react';
+import { Text, StyleSheet, Alert } from 'react-native';
+import { spacing, typography } from '../theme';
+import { BackButton, BottomBar, Button, Card, RecipeSummary, Screen } from '../components';
 import { deleteUserRecipe } from '../data/userRecipes';
 import { useSettingsStore } from '../store/settingsStore';
 import type { RecipeStackScreenProps } from '../navigation/types';
@@ -12,6 +11,7 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
 
   const roomTempC = useSettingsStore((state) => state.defaultRoomTempC);
   const starterStrength = useSettingsStore((state) => state.defaultStarterStrength);
+  const options = useMemo(() => ({ roomTempC, starterStrength }), [roomTempC, starterStrength]);
 
   const [deleting, setDeleting] = useState(false);
 
@@ -55,51 +55,11 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
     );
   }
 
-  const totalHours = getRecipeTotalHours(recipe, { roomTempC, starterStrength });
-
   return (
     <>
       <Screen withBottomBar>
         <BackButton />
-        {recipe.imageUrl ? (
-          <Image source={{ uri: recipe.imageUrl }} style={styles.heroImage} resizeMode="cover" />
-        ) : (
-          <View style={[styles.heroImage, styles.heroPlaceholder]}>
-            {/* textSub gav kun 3,8:1 på den sandfarvede flade. */}
-            <Text style={[typography.bodySmall, { color: colors.textMain }]}>Billede tilføjes</Text>
-          </View>
-        )}
-
-        <Text style={typography.h1}>{recipe.name}</Text>
-        <Text style={[typography.body, { marginBottom: spacing.xl }]}>{recipe.description}</Text>
-
-        <Card style={styles.infoCard}>
-          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Information</Text>
-          <Text style={typography.bodySmall}>Total tid: {totalHours} timer</Text>
-          <Text style={typography.bodySmall}>Aktiv tid: ~{recipe.handsOnMinutes} min</Text>
-          <Text style={typography.bodySmall}>Antal: {recipe.yield}</Text>
-          <Text style={typography.bodySmall}>Sværhedsgrad: {recipe.difficulty}</Text>
-        </Card>
-
-        <Card style={styles.infoCard}>
-          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Ingredienser</Text>
-          {recipe.ingredients.map((ingredient, idx) => (
-            <Text key={idx} style={typography.bodySmall}>• {ingredient}</Text>
-          ))}
-          <Button
-            title="Tilpas mængder"
-            variant="outline"
-            style={{ marginTop: spacing.lg }}
-            onPress={() => navigation.navigate('Beregner', { recipe })}
-          />
-        </Card>
-
-        <Card style={styles.infoCard}>
-          <Text style={[typography.h3, { marginBottom: spacing.sm }]}>Du skal bruge</Text>
-          {recipe.tools.map((tool, idx) => (
-            <Text key={idx} style={typography.bodySmall}>• {tool}</Text>
-          ))}
-        </Card>
+        <RecipeSummary recipe={recipe} options={options} />
 
         {recipe.isCustom && (
           <Card style={styles.infoCard}>
@@ -124,24 +84,20 @@ export const RecipeDetailScreen = ({ navigation, route }: RecipeStackScreenProps
       </Screen>
 
       <BottomBar>
-        <Button title="Planlæg denne opskrift" onPress={() => navigation.navigate('SetupOpskrift', { recipe })} />
+        {/*
+          Bagningen begynder altid med fodringen. Opskriften følger med, så
+          flowets trin "vis opskrifter" og "vælg opskrift" springes over.
+        */}
+        <Button
+          title="Bag denne – start med fodring"
+          onPress={() => navigation.navigate('Hjem', { screen: 'Fodring', params: { recipe } })}
+        />
       </BottomBar>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  heroImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: radius.xl,
-    marginBottom: 20,
-    backgroundColor: colors.border,
-  },
-  heroPlaceholder: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   infoCard: {
     marginBottom: spacing.lg,
   },

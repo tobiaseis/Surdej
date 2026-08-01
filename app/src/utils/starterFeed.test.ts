@@ -4,7 +4,6 @@ import {
   DEFAULT_FEED_RATIO,
   calculateFeed,
   formatHourRange,
-  getFeedTime,
   getPeakTimes,
   getPeakWindow,
 } from './starterFeed';
@@ -92,16 +91,6 @@ describe('getPeakTimes', () => {
 
     assert.ok(from.getTime() > fedAt.getTime());
     assert.ok(to.getTime() > from.getTime());
-  });
-});
-
-describe('getFeedTime', () => {
-  it('works backwards from when the starter has to be ready', () => {
-    const readyAt = new Date('2026-08-01T21:00:00');
-    const feedAt = getFeedTime(ratio155, readyAt);
-    const hours = (readyAt.getTime() - feedAt.getTime()) / (60 * 60 * 1000);
-
-    assert.ok(Math.abs(hours - getPeakWindow(ratio155).hours) < 0.01);
   });
 });
 

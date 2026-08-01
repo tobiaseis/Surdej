@@ -1,13 +1,17 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, spacing, typography } from '../theme';
-import { Button, Card, Screen, StatusBadge } from '../components';
+import { Button, Card, RecipeCard, Screen } from '../components';
 import { fetchRecipes, Recipe } from '../data/recipes';
-import { getRecipeMetaItems } from '../utils/recipeMeta';
 import { useSettingsStore } from '../store/settingsStore';
 import type { RecipeStackScreenProps } from '../navigation/types';
 
+/**
+ * Opskriftsbiblioteket. Selve bagningen starter fra Hjem, hvor fodringen er
+ * første trin – herfra læses og skrives der opskrifter, og en opskrift kan
+ * sendes ind i bageflowet, som så begynder med fodringen.
+ */
 export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'OpskriftListe'>) => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,8 +45,10 @@ export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'Opskrif
 
   return (
     <Screen>
-      <Text style={typography.h1}>Hvad vil du bage?</Text>
-      <Text style={[typography.body, { marginBottom: spacing.lg }]}>Vælg en opskrift for at starte en plan.</Text>
+      <Text style={typography.h1}>Opskrifter</Text>
+      <Text style={[typography.body, { marginBottom: spacing.lg }]}>
+        Læs dem igennem, eller skriv dine egne. Du kan starte en bagning herfra.
+      </Text>
 
       <Button
         title="Skriv din egen opskrift"
@@ -61,58 +67,15 @@ export const RecipeListScreen = ({ navigation }: RecipeStackScreenProps<'Opskrif
           </Text>
         </Card>
       ) : (
-        recipes.map((recipe) => {
-          const metaItems = getRecipeMetaItems(recipe, options);
-
-          return (
-            <TouchableOpacity
-              key={recipe.id}
-              onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-            >
-              <Card style={styles.recipeCard}>
-                <View style={styles.cardHeader}>
-                  <Text style={[typography.h2, styles.cardTitle]}>{recipe.name}</Text>
-                  {recipe.isCustom && <StatusBadge label="Din egen" tone="accent" />}
-                </View>
-                <Text style={[typography.body, { marginBottom: spacing.md }]}>{recipe.description}</Text>
-
-                <View style={styles.badges}>
-                  {metaItems.map((item) => (
-                    <StatusBadge key={item.label} label={item.label} tone={item.tone} />
-                  ))}
-                </View>
-              </Card>
-            </TouchableOpacity>
-          );
-        })
+        recipes.map((recipe) => (
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            options={options}
+            onPress={() => navigation.navigate('OpskriftDetaljer', { recipe })}
+          />
+        ))
       )}
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  recipeCard: {
-    marginBottom: spacing.lg,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  /**
-   * Text har flexShrink: 0 som standard i React Native. Uden dette skubber
-   * et langt opskriftsnavn "Din egen"-badget ud over kortets kant.
-   */
-  cardTitle: {
-    flex: 1,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-});

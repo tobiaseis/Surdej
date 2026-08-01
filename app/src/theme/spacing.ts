@@ -30,8 +30,8 @@ export const layout = {
    * én knap: bjælkens egen højde (24 + 52 + 24) plus lidt luft.
    */
   bottomBarClearance: 120,
-  /** Samme, men til bjælker med to linjer – resultattal eller en hjælpetekst. */
-  bottomBarClearanceTall: 150,
+  /** Samme, men til bjælker med både en resultatlinje og en knap under den. */
+  bottomBarClearanceTall: 190,
   /**
    * Tekstlinjer bliver ulæseligt lange på tablets, hvor indholdet ellers
    * ville strække sig over hele bredden. Appen understøtter iPad.
